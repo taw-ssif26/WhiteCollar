@@ -9,7 +9,7 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Force IPv4 to avoid any potential IPv6 issues
+# Force IPv4
 try:
     old_getaddrinfo = socket.getaddrinfo
     def new_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
@@ -50,8 +50,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'elite_english.urls'
 
-# elite_english/settings.py
-
+# ✅ FIXED TEMPLATES - Correct path (no extra 's')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -70,11 +69,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'elite_english.wsgi.application'
 
-# ============================================
-# AIVEN POSTGRESQL DATABASE CONFIGURATION
-# ============================================
+# Database
 DATABASE_URL = os.getenv('DATABASE_URL')
-
 if DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.config(
@@ -84,7 +80,6 @@ if DATABASE_URL:
         )
     }
 else:
-    # Fallback to SQLite for local development
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -104,21 +99,19 @@ TIME_ZONE = 'Asia/Dhaka'
 USE_I18N = True
 USE_TZ = True
 
+# Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
+# Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Create media directories
 os.makedirs(MEDIA_ROOT, exist_ok=True)
-os.makedirs(os.path.join(MEDIA_ROOT, 'gallery'), exist_ok=True)
-os.makedirs(os.path.join(MEDIA_ROOT, 'events'), exist_ok=True)
-os.makedirs(os.path.join(MEDIA_ROOT, 'achievements'), exist_ok=True)
-os.makedirs(os.path.join(MEDIA_ROOT, 'resources'), exist_ok=True)
-os.makedirs(os.path.join(MEDIA_ROOT, 'teachers'), exist_ok=True)
-os.makedirs(os.path.join(MEDIA_ROOT, 'invoices'), exist_ok=True)
+for subdir in ['gallery', 'events', 'achievements', 'resources', 'teachers', 'invoices']:
+    os.makedirs(os.path.join(MEDIA_ROOT, subdir), exist_ok=True)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -132,11 +125,11 @@ CORS_ALLOWED_ORIGINS = [
     'https://*.onrender.com',
 ]
 
-# Telegram Bot Settings (Optional)
+# Telegram Bot
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', '')
 
-# Email Settings (Optional)
+# Email
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
