@@ -1,0 +1,28 @@
+# render.yaml
+services:
+  - type: web
+    name: elite-english
+    runtime: python
+    plan: free
+    buildCommand: |
+      apt-get update && apt-get install -y libjpeg-dev libpng-dev
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+    startCommand: gunicorn elite_english.wsgi:application
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: elite-english-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
+      - key: PYTHON_VERSION
+        value: 3.12.0
+
+databases:
+  - name: elite-english-db
+    plan: free
