@@ -12,6 +12,10 @@ from .forms import *
 def is_admin(user):
     return user.is_superuser or user.is_staff
 
+# ============================================
+# PUBLIC VIEWS
+# ============================================
+
 def front_page(request):
     events = Event.objects.filter(event_type='upcoming')[:3]
     achievements = Achievement.objects.all()[:3]
@@ -59,6 +63,79 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('front_page')
+
+def events_view(request):
+    upcoming = Event.objects.filter(event_type='upcoming').order_by('date')
+    completed = Event.objects.filter(event_type='completed').order_by('-date')
+    return render(request, 'core/events.html', {'upcoming': upcoming, 'completed': completed})
+
+def gallery_view(request):
+    images = Gallery.objects.all()
+    return render(request, 'core/gallery.html', {'images': images})
+
+def results_view(request):
+    top_results = Result.objects.all().order_by('-percentage')[:3]
+    all_results = Result.objects.all().order_by('-exam_date', '-percentage')
+    return render(request, 'core/results.html', {'top_results': top_results, 'all_results': all_results})
+
+def achievements_view(request):
+    achievements = Achievement.objects.all()
+    return render(request, 'core/achievements.html', {'achievements': achievements})
+
+def teacher_view(request):
+    try:
+        teacher = Teacher.objects.first()
+    except:
+        teacher = None
+    return render(request, 'core/teacher.html', {'teacher': teacher})
+
+def about_view(request):
+    about = AboutInfo.objects.first()
+    return render(request, 'core/about.html', {'about': about})
+
+def contact_view(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your message has been sent successfully!')
+            return redirect('contact_view')
+    else:
+        form = ContactForm()
+    return render(request, 'core/contact.html', {'form': form})
+
+def admission_view(request):
+    if request.method == 'POST':
+        form = AdmissionForm(request.POST)
+        if form.is_valid():
+            # Send to Telegram if configured
+            try:
+                from .utils.telegram import send_telegram_message
+                message = f"""
+🎓 New Admission Request
+
+Name: {form.cleaned_data['name']}
+Class: {form.cleaned_data['class_name']}
+School Roll: {form.cleaned_data['roll']}
+Email: {form.cleaned_data['email']}
+Contact: {form.cleaned_data['phone']}
+Guardian: {form.cleaned_data['guardian_phone']}
+School: {form.cleaned_data['school_name']}
+Heard From: {form.cleaned_data['heard_from']}
+                """
+                send_telegram_message(message)
+            except Exception:
+                pass  # Telegram is optional
+            
+            messages.success(request, 'Admission request submitted successfully! We will contact you soon.')
+            return redirect('admission_view')
+    else:
+        form = AdmissionForm()
+    return render(request, 'core/admission.html', {'form': form})
+
+# ============================================
+# STUDENT DASHBOARD VIEWS
+# ============================================
 
 @login_required
 def student_dashboard(request):
@@ -109,6 +186,41 @@ def update_profile(request):
         return redirect('student_dashboard')
     return redirect('student_dashboard')
 
+@login_required
+def routine_view(request):
+    if request.user.is_superuser or request.user.is_staff:
+        routines = Routine.objects.all().order_by('class_obj', 'day', 'start_time')
+        return render(request, 'core/routine_admin.html', {'routines': routines})
+    else:
+        student = request.user.student
+        routines = Routine.objects.filter(class_obj__name=student.class_name)
+        return render(request, 'core/routine.html', {'routines': routines})
+
+@login_required
+def invoice_request(request):
+    if request.method == 'POST':
+        student = request.user.student
+        month = request.POST.get('month')
+        year = request.POST.get('year')
+        Invoice.objects.create(
+            student=student,
+            month=month,
+            year=year,
+            amount=1500.00
+        )
+        messages.success(request, 'Invoice requested successfully!')
+        return redirect('student_dashboard')
+    return render(request, 'core/invoice_request.html')
+
+@login_required
+def resources_view(request):
+    resources = Resource.objects.all()
+    return render(request, 'core/resources.html', {'resources': resources})
+
+# ============================================
+# ADMIN VIEWS
+# ============================================
+
 @user_passes_test(is_admin)
 def admin_dashboard(request):
     context = {
@@ -121,6 +233,10 @@ def admin_dashboard(request):
         'recent_invoices': Invoice.objects.filter(status='pending').order_by('-generated_date')[:10],
     }
     return render(request, 'core/admin_dashboard.html', context)
+
+# ============================================
+# STUDENT MANAGEMENT (Admin)
+# ============================================
 
 @user_passes_test(is_admin)
 def student_list(request):
@@ -162,10 +278,9 @@ def student_delete(request, pk):
         return redirect('student_list')
     return render(request, 'core/confirm_delete.html', {'object': student, 'type': 'Student'})
 
-def events_view(request):
-    upcoming = Event.objects.filter(event_type='upcoming').order_by('date')
-    completed = Event.objects.filter(event_type='completed').order_by('-date')
-    return render(request, 'core/events.html', {'upcoming': upcoming, 'completed': completed})
+# ============================================
+# EVENT MANAGEMENT (Admin)
+# ============================================
 
 @user_passes_test(is_admin)
 def event_add(request):
@@ -202,9 +317,9 @@ def event_delete(request, pk):
         return redirect('events_view')
     return render(request, 'core/confirm_delete.html', {'object': event, 'type': 'Event'})
 
-def gallery_view(request):
-    images = Gallery.objects.all()
-    return render(request, 'core/gallery.html', {'images': images})
+# ============================================
+# GALLERY MANAGEMENT (Admin)
+# ============================================
 
 @user_passes_test(is_admin)
 def gallery_add(request):
@@ -228,10 +343,9 @@ def gallery_delete(request, pk):
         return redirect('gallery_view')
     return render(request, 'core/confirm_delete.html', {'object': gallery, 'type': 'Image'})
 
-def results_view(request):
-    top_results = Result.objects.all().order_by('-percentage')[:3]
-    all_results = Result.objects.all().order_by('-exam_date', '-percentage')
-    return render(request, 'core/results.html', {'top_results': top_results, 'all_results': all_results})
+# ============================================
+# RESULT MANAGEMENT (Admin)
+# ============================================
 
 @user_passes_test(is_admin)
 def result_add(request):
@@ -256,9 +370,9 @@ def result_upload_excel(request):
         form = ExcelUploadForm()
     return render(request, 'core/result_upload.html', {'form': form})
 
-def achievements_view(request):
-    achievements = Achievement.objects.all()
-    return render(request, 'core/achievements.html', {'achievements': achievements})
+# ============================================
+# ACHIEVEMENT MANAGEMENT (Admin)
+# ============================================
 
 @user_passes_test(is_admin)
 def achievement_add(request):
@@ -295,69 +409,9 @@ def achievement_delete(request, pk):
         return redirect('achievements_view')
     return render(request, 'core/confirm_delete.html', {'object': achievement, 'type': 'Achievement'})
 
-def teacher_view(request):
-    teacher = Teacher.objects.first()
-    return render(request, 'core/teacher.html', {'teacher': teacher})
-
-def about_view(request):
-    about = AboutInfo.objects.first()
-    return render(request, 'core/about.html', {'about': about})
-
-def contact_view(request):
-    if request.method == 'POST':
-        form = ContactForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Your message has been sent successfully!')
-            return redirect('contact_view')
-    else:
-        form = ContactForm()
-    return render(request, 'core/contact.html', {'form': form})
-
-def admission_view(request):
-    if request.method == 'POST':
-        form = AdmissionForm(request.POST)
-        if form.is_valid():
-            # Send to Telegram if configured
-            try:
-                from .utils.telegram import send_telegram_message
-                message = f"""
-🎓 New Admission Request
-
-Name: {form.cleaned_data['name']}
-Class: {form.cleaned_data['class_name']}
-School Roll: {form.cleaned_data['roll']}
-Email: {form.cleaned_data['email']}
-Contact: {form.cleaned_data['phone']}
-Guardian: {form.cleaned_data['guardian_phone']}
-School: {form.cleaned_data['school_name']}
-Heard From: {form.cleaned_data['heard_from']}
-                """
-                send_telegram_message(message)
-            except:
-                pass  # Telegram is optional
-            
-            messages.success(request, 'Admission request submitted successfully! We will contact you soon.')
-            return redirect('admission_view')
-    else:
-        form = AdmissionForm()
-    return render(request, 'core/admission.html', {'form': form})
-
-@login_required
-def invoice_request(request):
-    if request.method == 'POST':
-        student = request.user.student
-        month = request.POST.get('month')
-        year = request.POST.get('year')
-        Invoice.objects.create(
-            student=student,
-            month=month,
-            year=year,
-            amount=1500.00
-        )
-        messages.success(request, 'Invoice requested successfully!')
-        return redirect('student_dashboard')
-    return render(request, 'core/invoice_request.html')
+# ============================================
+# INVOICE MANAGEMENT (Admin)
+# ============================================
 
 @user_passes_test(is_admin)
 def invoice_manage(request):
@@ -382,15 +436,9 @@ def invoice_mark_paid(request, pk):
     messages.success(request, f'Invoice marked as paid for {invoice.student.name}')
     return redirect('invoice_manage')
 
-@login_required
-def routine_view(request):
-    if request.user.is_superuser or request.user.is_staff:
-        routines = Routine.objects.all().order_by('class_obj', 'day', 'start_time')
-        return render(request, 'core/routine_admin.html', {'routines': routines})
-    else:
-        student = request.user.student
-        routines = Routine.objects.filter(class_obj__name=student.class_name)
-        return render(request, 'core/routine.html', {'routines': routines})
+# ============================================
+# ROUTINE MANAGEMENT (Admin)
+# ============================================
 
 @user_passes_test(is_admin)
 def routine_add(request):
@@ -404,6 +452,10 @@ def routine_add(request):
         form = RoutineForm()
     return render(request, 'core/routine_form.html', {'form': form, 'title': 'Add Routine'})
 
+# ============================================
+# ATTENDANCE MANAGEMENT (Admin)
+# ============================================
+
 @user_passes_test(is_admin)
 def attendance_manage(request):
     if request.method == 'POST':
@@ -412,10 +464,9 @@ def attendance_manage(request):
     classes = Class.objects.all()
     return render(request, 'core/attendance.html', {'classes': classes})
 
-@login_required
-def resources_view(request):
-    resources = Resource.objects.all()
-    return render(request, 'core/resources.html', {'resources': resources})
+# ============================================
+# RESOURCE MANAGEMENT (Admin)
+# ============================================
 
 @user_passes_test(is_admin)
 def resource_add(request):
