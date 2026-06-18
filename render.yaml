@@ -1,10 +1,12 @@
-# render.yaml
 services:
   - type: web
     name: elite-english
-    runtime: docker  # ← CHANGE THIS to docker
+    runtime: python
     plan: free
-    dockerfilePath: ./Dockerfile  # ← ADD THIS
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+    startCommand: gunicorn elite_english.wsgi:application
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -16,6 +18,8 @@ services:
         value: false
       - key: ALLOWED_HOSTS
         value: .onrender.com
+      - key: PYTHON_VERSION
+        value: 3.12.0
 
 databases:
   - name: elite-english-db
