@@ -1,3 +1,4 @@
+# core/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -7,30 +8,19 @@ from django.utils import timezone
 import json
 from .models import *
 from .forms import *
-from .utils.supabase_client import get_supabase_client, get_supabase_service_client
+
+# ❌ REMOVE THIS LINE:
+# from .utils.supabase_client import get_supabase_client, get_supabase_service_client
 
 def is_admin(user):
     return user.is_superuser or user.is_staff
 
 def front_page(request):
-    # Fetch data from Supabase
-    supabase = get_supabase_client()
-    
-    # Get events
-    events_response = supabase.table('core_event').select('*').eq('event_type', 'upcoming').limit(3).execute()
-    events = events_response.data if events_response.data else []
-    
-    # Get achievements
-    achievements_response = supabase.table('core_achievement').select('*').limit(3).order('date', desc=True).execute()
-    achievements = achievements_response.data if achievements_response.data else []
-    
-    # Get gallery
-    gallery_response = supabase.table('core_gallery').select('*').limit(6).order('uploaded_date', desc=True).execute()
-    gallery = gallery_response.data if gallery_response.data else []
-    
-    # Get results
-    results_response = supabase.table('core_result').select('*, student:student_id(*)').order('percentage', desc=True).limit(3).execute()
-    results = results_response.data if results_response.data else []
+    # ✅ Use Django ORM instead of Supabase
+    events = Event.objects.filter(event_type='upcoming')[:3]
+    achievements = Achievement.objects.all()[:3]
+    gallery = Gallery.objects.all()[:6]
+    results = Result.objects.all().order_by('-percentage')[:3]
     
     return render(request, 'core/front_page.html', {
         'events': events,
@@ -39,6 +29,7 @@ def front_page(request):
         'results': results,
     })
 
+# ... rest of your views remain the same, using Django ORM
 def login_view(request):
     if request.user.is_authenticated:
         if request.user.is_superuser or request.user.is_staff:
