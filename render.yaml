@@ -1,3 +1,4 @@
+# render.yaml
 services:
   - type: web
     name: elite-english
@@ -5,21 +6,19 @@ services:
     plan: free
     buildCommand: |
       pip install -r requirements.txt
+      python manage.py migrate
+      python manage.py setup_initial
       python manage.py collectstatic --noinput
     startCommand: gunicorn elite_english.wsgi:application
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: elite-english-db
-          property: connectionString
+        value: postgresql://avnadmin:YOUR_PASSWORD@YOUR_HOST.aivencloud.com:YOUR_PORT/defaultdb?sslmode=require
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
         value: false
       - key: ALLOWED_HOSTS
-        value: .onrender.com
-      - key: PYTHON_VERSION
-        value: 3.12.0
+        value: whitecollar-1.onrender.com,.onrender.com
 
 databases:
   - name: elite-english-db
