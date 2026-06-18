@@ -1,3 +1,4 @@
+# core/urls.py
 from django.urls import path
 from . import views
 
@@ -17,6 +18,7 @@ urlpatterns = [
     
     # Student dashboard
     path('dashboard/', views.student_dashboard, name='student_dashboard'),
+    path('update-profile/', views.update_profile, name='update_profile'),
     path('routine/', views.routine_view, name='routine_view'),
     path('invoice-request/', views.invoice_request, name='invoice_request'),
     path('resources/', views.resources_view, name='resources_view'),
