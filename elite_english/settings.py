@@ -52,13 +52,13 @@ ROOT_URLCONF = 'elite_english.urls'
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'BACKEND': 'django.templates.backends.django.DjangoTemplates',
         'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
+                'django.templates.context_processors.debug',
+                'django.templates.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -71,11 +71,9 @@ WSGI_APPLICATION = 'elite_english.wsgi.application'
 # ============================================
 # AIVEN POSTGRESQL DATABASE CONFIGURATION
 # ============================================
-# Use DATABASE_URL from environment
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 if DATABASE_URL:
-    # Parse the URL and configure database
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
@@ -84,22 +82,13 @@ if DATABASE_URL:
         )
     }
 else:
-    # Fallback to SQLite for local development without Aiven
+    # Fallback to SQLite for local development
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
-
-# Optional: Add connection pool settings for better performance
-# DATABASES['default']['OPTIONS'] = {
-#     'connect_timeout': 30,
-#     'keepalives': 1,
-#     'keepalives_idle': 60,
-#     'keepalives_interval': 30,
-#     'keepalives_count': 5,
-# }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -113,16 +102,14 @@ TIME_ZONE = 'Asia/Dhaka'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-# Media files (uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Create media directories if they don't exist
+# Create media directories
 os.makedirs(MEDIA_ROOT, exist_ok=True)
 os.makedirs(os.path.join(MEDIA_ROOT, 'gallery'), exist_ok=True)
 os.makedirs(os.path.join(MEDIA_ROOT, 'events'), exist_ok=True)
@@ -137,31 +124,11 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
-# CORS Settings
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:8000',
     'http://127.0.0.1:8000',
-    'https://*.onrender.com',  # For Render deployment
+    'https://*.onrender.com',
 ]
-
-# ============================================
-# OPTIONAL: AIVEN CONNECTION POOLING
-# ============================================
-# If you want to use connection pooling (recommended for production)
-# Add these to your DATABASES['default']:
-# 'ENGINE': 'django.db.backends.postgresql',
-# 'NAME': os.getenv('DB_NAME', 'defaultdb'),
-# 'USER': os.getenv('DB_USER', 'avnadmin'),
-# 'PASSWORD': os.getenv('DB_PASSWORD', ''),
-# 'HOST': os.getenv('DB_HOST', ''),
-# 'PORT': os.getenv('DB_PORT', '24364'),
-# 'OPTIONS': {
-#     'sslmode': 'require',
-# },
-
-# MIM SMS Settings (Optional)
-MIM_SMS_API_KEY = os.getenv('MIM_SMS_API_KEY', '')
-MIM_SMS_SENDER_ID = os.getenv('MIM_SMS_SENDER_ID', '')
 
 # Telegram Bot Settings (Optional)
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '')
