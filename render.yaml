@@ -6,8 +6,8 @@ services:
     plan: free
     buildCommand: |
       pip install -r requirements.txt
+      python -c "import os; import django; os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'elite_english.settings'); django.setup(); from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@eliteenglish.com', 'admin123') if not User.objects.filter(username='admin').exists() else None"
       python manage.py migrate
-      python manage.py setup_initial
       python manage.py collectstatic --noinput
     startCommand: gunicorn elite_english.wsgi:application
     envVars:
@@ -19,7 +19,3 @@ services:
         value: false
       - key: ALLOWED_HOSTS
         value: whitecollar-1.onrender.com,.onrender.com
-
-databases:
-  - name: elite-english-db
-    plan: free
