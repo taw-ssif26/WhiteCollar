@@ -7,7 +7,7 @@
 <section class="relative min-h-[600px] md:min-h-[800px] flex items-center justify-center overflow-hidden px-4 md:px-12 lg:px-16">
     <div class="absolute inset-0 z-0">
         <div class="w-full h-full bg-cover bg-center" 
-             style="background-image: url('/media/hero-bg.jpg'); opacity: 0.6;">
+             style="background-image: url('/static/images/hero-bg.jpg'); opacity: 0.3;">
         </div>
         <div class="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/90"></div>
     </div>
@@ -18,18 +18,18 @@
         <h1 class="font-display-lg text-4xl md:text-6xl text-secondary mb-6 leading-tight text-glow font-['EB_Garamond']">
             Master the Language of Global Influence
         </h1>
-        <p class="font-body-lg text-base md:text-lg text-on-surface-variant mb-8 max-w-2xl mx-auto leading-relaxed">
+        <p class="text-on-surface-variant text-base md:text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
             Elite English Coaching provides an unparalleled educational experience designed for the visionaries of tomorrow. 
             Through curated curricula, personalized mentorship from industry leaders, and a commitment to academic rigor, 
             we transform students into articulate leaders.
         </p>
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a href="{% url 'admission_view' %}" 
-               class="w-full sm:w-auto bg-secondary text-on-secondary px-10 py-4 rounded-full font-label-caps text-sm font-bold transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(233,193,118,0.4)]">
+               class="bg-secondary text-on-secondary px-10 py-4 rounded-full font-label-caps text-sm font-bold transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(233,193,118,0.4)]">
                 Start Your Journey
             </a>
             <a href="#highlights" 
-               class="w-full sm:w-auto border border-secondary/30 backdrop-blur-md text-secondary px-10 py-4 rounded-full font-label-caps text-sm font-bold hover:bg-secondary/10 transition-all">
+               class="border border-secondary/30 backdrop-blur-md text-secondary px-10 py-4 rounded-full font-label-caps text-sm font-bold hover:bg-secondary/10 transition-all">
                 Explore More
             </a>
         </div>
@@ -43,24 +43,65 @@
         <p class="text-on-surface-variant max-w-lg mx-auto">Discover the pillars that define our pedagogical excellence.</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Highlight 1 -->
         <div class="glass-card p-8 rounded-xl group">
             <span class="material-symbols-outlined text-4xl text-secondary mb-4 block">auto_stories</span>
             <h3 class="font-headline-md text-2xl mb-3 text-secondary font-['EB_Garamond']">Curated Global Curriculum</h3>
             <p class="text-on-surface-variant">Access resources and study materials sourced from the world's most prestigious academic institutions.</p>
         </div>
-        <!-- Highlight 2 -->
         <div class="glass-card p-8 rounded-xl group">
             <span class="material-symbols-outlined text-4xl text-secondary mb-4 block">military_tech</span>
             <h3 class="font-headline-md text-2xl mb-3 text-secondary font-['EB_Garamond']">Personalized Mentorship</h3>
             <p class="text-on-surface-variant">One-on-one sessions that target your specific linguistic barriers and learning goals.</p>
         </div>
-        <!-- Highlight 3 -->
         <div class="glass-card p-8 rounded-xl group">
             <span class="material-symbols-outlined text-4xl text-secondary mb-4 block">language</span>
             <h3 class="font-headline-md text-2xl mb-3 text-secondary font-['EB_Garamond']">Global Network</h3>
             <p class="text-on-surface-variant">Join a prestigious alumni network across top-tier global universities and organizations.</p>
         </div>
+    </div>
+</section>
+
+<!-- Events Preview -->
+<section class="py-16 md:py-24 px-4 md:px-12 lg:px-16 max-w-7xl mx-auto bg-surface-container-low/30">
+    <div class="text-center mb-12">
+        <h2 class="font-display-lg text-3xl md:text-4xl text-secondary mb-4 font-['EB_Garamond']">Upcoming Events</h2>
+        <p class="text-on-surface-variant">Engage with our exclusive workshops and seminars.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% for event in events %}
+        <div class="glass-card rounded-xl overflow-hidden group">
+            {% if event.image %}
+            <div class="h-48 overflow-hidden">
+                <img src="{{ event.image.url }}" alt="{{ event.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+            </div>
+            {% endif %}
+            <div class="p-6">
+                <div class="text-on-surface-variant text-xs">{{ event.date|date:"F d, Y" }}</div>
+                <h4 class="font-headline-md text-xl text-on-surface mt-2 group-hover:text-secondary transition-colors">{{ event.title }}</h4>
+                <p class="text-on-surface-variant text-sm mt-2">{{ event.description|truncatewords:15|safe }}</p>
+                <a href="{% url 'events_view' %}" class="text-secondary text-sm hover:underline mt-4 inline-block">View Details →</a>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-on-surface-variant col-span-full text-center">No upcoming events scheduled.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Gallery Preview -->
+<section class="py-16 md:py-24 px-4 md:px-12 lg:px-16 max-w-7xl mx-auto">
+    <div class="text-center mb-12">
+        <h2 class="font-display-lg text-3xl md:text-4xl text-secondary mb-4 font-['EB_Garamond']">The Elite Life</h2>
+        <p class="text-on-surface-variant">A glimpse into our prestigious learning environment.</p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {% for image in gallery %}
+        <div class="glass-card p-2 rounded-xl overflow-hidden group">
+            <img src="{{ image.image.url }}" alt="{{ image.title }}" class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105 rounded-lg">
+        </div>
+        {% empty %}
+        <p class="text-on-surface-variant col-span-full text-center">No images available.</p>
+        {% endfor %}
     </div>
 </section>
 {% endblock %}
