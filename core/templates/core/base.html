@@ -32,15 +32,6 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
         }
-        .bg-gradient-premium {
-            background: linear-gradient(135deg, #0b1326 0%, #1a2a44 50%, #0b1326 100%);
-        }
-        .border-glow {
-            box-shadow: 0 0 20px rgba(233, 193, 118, 0.1);
-        }
-        .bg-surface-dim {
-            background: rgba(11, 19, 38, 0.5);
-        }
         .text-secondary {
             color: #e9c176;
         }
@@ -56,20 +47,8 @@
         .border-secondary {
             border-color: #e9c176;
         }
-        .hover\:text-secondary:hover {
-            color: #e9c176;
-        }
-        .hover\:bg-secondary:hover {
-            background-color: #e9c176;
-        }
-        .hover\:border-secondary:hover {
-            border-color: #e9c176;
-        }
         .text-on-secondary {
             color: #412d00;
-        }
-        .bg-surface-container-high {
-            background: #222a3d;
         }
         .bg-surface-container-highest {
             background: #2d3449;
@@ -87,13 +66,6 @@
         .float-animation {
             animation: float 3s ease-in-out infinite;
         }
-        @keyframes pulse-glow {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-        .pulse-glow {
-            animation: pulse-glow 2s ease-in-out infinite;
-        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -104,6 +76,22 @@
             Elite English
         </a>
         
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center gap-6 lg:gap-10">
+            <a href="{% url 'front_page' %}" class="text-on-surface/80 hover:text-secondary transition-colors font-label-caps text-xs lg:text-sm">Home</a>
+            <a href="{% url 'events_view' %}" class="text-on-surface/80 hover:text-secondary transition-colors font-label-caps text-xs lg:text-sm">Events</a>
+            <a href="{% url 'gallery_view' %}" class="text-on-surface/80 hover:text-secondary transition-colors font-label-caps text-xs lg:text-sm">Gallery</a>
+            <a href="{% url 'results_view' %}" class="text-on-surface/80 hover:text-secondary transition-colors font-label-caps text-xs lg:text-sm">Results</a>
+            <a href="{% url 'achievements_view' %}" class="text-on-surface/80 hover:text-secondary transition-colors font-label-caps text-xs lg:text-sm">Achievements</a>
+            <a href="{% url 'teacher_view' %}" class="text-on-surface/80 hover:text-secondary transition-colors font-label-caps text-xs lg:text-sm">Teacher</a>
+            <a href="{% url 'about_view' %}" class="text-on-surface/80 hover:text-secondary transition-colors font-label-caps text-xs lg:text-sm">About</a>
+            <a href="{% url 'contact_view' %}" class="text-on-surface/80 hover:text-secondary transition-colors font-label-caps text-xs lg:text-sm">Contact</a>
+            <a href="{% url 'admission_view' %}" class="bg-secondary text-on-secondary px-6 py-2 rounded-full font-label-caps text-xs font-bold hover:shadow-[0_0_20px_rgba(233,193,118,0.4)] transition-all">
+                Get Admission
+            </a>
+        </div>
+        
+        <!-- Right side - Login/Dashboard -->
         <div class="flex items-center gap-4 md:gap-6">
             {% if user.is_authenticated %}
                 {% if user.is_superuser or user.is_staff %}
@@ -145,6 +133,11 @@
             <a href="{% url 'admission_view' %}" class="bg-secondary text-on-secondary px-8 py-3 rounded-full font-label-caps text-sm font-bold transition-all hover:shadow-[0_0_20px_rgba(233,193,118,0.4)]">
                 Get Admission
             </a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="text-on-surface/80 hover:text-secondary transition-colors text-lg">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="text-on-surface/80 hover:text-secondary transition-colors text-lg">Login</a>
+            {% endif %}
         </div>
     </div>
 
@@ -164,7 +157,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="w-full py-16 px-4 md:px-12 lg:px-16 grid grid-cols-1 md:grid-cols-4 gap-8 bg-surface-container-lowest border-t border-white/5 backdrop-blur-md">
+    <footer class="w-full py-16 px-4 md:px-12 lg:px-16 grid grid-cols-1 md:grid-cols-4 gap-8 bg-surface-container-low/30 border-t border-white/5 backdrop-blur-md">
         <div class="col-span-1">
             <div class="font-headline-md text-2xl text-secondary mb-4 font-['EB_Garamond']">Elite English</div>
             <p class="text-on-surface-variant text-sm leading-relaxed">Redefining English proficiency through a lens of prestige and academic rigor.</p>
@@ -194,31 +187,16 @@
     <script>
         // Mobile menu toggle
         document.getElementById('mobile-menu-btn').addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
+            document.getElementById('mobile-menu').classList.toggle('hidden');
         });
-
+        
         // Close mobile menu on link click
         document.querySelectorAll('#mobile-menu a').forEach(link => {
             link.addEventListener('click', function() {
                 document.getElementById('mobile-menu').classList.add('hidden');
             });
         });
-
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                const href = this.getAttribute('href');
-                if (href !== '#') {
-                    e.preventDefault();
-                    const target = document.querySelector(href);
-                    if (target) {
-                        target.scrollIntoView({ behavior: 'smooth' });
-                    }
-                }
-            });
-        });
-
+        
         // Auto-dismiss messages
         setTimeout(() => {
             document.querySelectorAll('.fixed .glass-card').forEach(el => {
