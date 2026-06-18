@@ -11,6 +11,6 @@ django-filter==23.5
 psycopg2-binary==2.9.9
 whitenoise==6.6.0
 django-ckeditor==6.7.0
-supabase==2.0.0
+supabase
 supabase-py==0.5.0
 postgrest==0.10.0
