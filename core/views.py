@@ -319,8 +319,9 @@ def admission_view(request):
         form = AdmissionForm(request.POST)
         if form.is_valid():
             # Send to Telegram if configured
-            from .utils.telegram import send_telegram_message
-            message = f"""
+            try:
+                from .utils.telegram import send_telegram_message
+                message = f"""
 🎓 New Admission Request
 
 Name: {form.cleaned_data['name']}
@@ -331,8 +332,11 @@ Contact: {form.cleaned_data['phone']}
 Guardian: {form.cleaned_data['guardian_phone']}
 School: {form.cleaned_data['school_name']}
 Heard From: {form.cleaned_data['heard_from']}
-            """
-            send_telegram_message(message)
+                """
+                send_telegram_message(message)
+            except:
+                pass  # Telegram is optional
+            
             messages.success(request, 'Admission request submitted successfully! We will contact you soon.')
             return redirect('admission_view')
     else:
