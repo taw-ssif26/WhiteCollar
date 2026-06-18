@@ -2,13 +2,9 @@
 services:
   - type: web
     name: elite-english
-    runtime: python
+    runtime: docker  # ← CHANGE THIS to docker
     plan: free
-    buildCommand: |
-      apt-get update && apt-get install -y libjpeg-dev libpng-dev
-      pip install -r requirements.txt
-      python manage.py collectstatic --noinput
-    startCommand: gunicorn elite_english.wsgi:application
+    dockerfilePath: ./Dockerfile  # ← ADD THIS
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -20,8 +16,6 @@ services:
         value: false
       - key: ALLOWED_HOSTS
         value: .onrender.com
-      - key: PYTHON_VERSION
-        value: 3.12.0  # ← Force Python 3.12
 
 databases:
   - name: elite-english-db
