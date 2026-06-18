@@ -1,0 +1,70 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Contact{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-7xl mx-auto">
+    <div class="text-center mb-12">
+        <h2 class="font-display-lg text-4xl md:text-5xl text-secondary font-['EB_Garamond']">Connect With Excellence</h2>
+        <p class="text-on-surface-variant mt-4">Reach out to us through any of these channels</p>
+    </div>
+
+    <!-- Contact Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <a href="tel:+8801234567890" class="glass-card p-8 rounded-2xl group text-center hover:border-secondary transition-all">
+            <span class="material-symbols-outlined text-4xl text-secondary mb-4 group-hover:scale-110 transition-transform block">call</span>
+            <p class="font-label-caps text-xs text-on-surface-variant mb-2">HOTLINE</p>
+            <p class="text-on-surface font-semibold">+880 1234 567890</p>
+        </a>
+        <a href="https://wa.me/8801234567890" target="_blank" class="glass-card p-8 rounded-2xl group text-center hover:border-secondary transition-all">
+            <span class="material-symbols-outlined text-4xl text-secondary mb-4 group-hover:scale-110 transition-transform block">chat</span>
+            <p class="font-label-caps text-xs text-on-surface-variant mb-2">WHATSAPP</p>
+            <p class="text-on-surface font-semibold">Direct Message</p>
+        </a>
+        <a href="https://facebook.com/eliteenglish" target="_blank" class="glass-card p-8 rounded-2xl group text-center hover:border-secondary transition-all">
+            <span class="material-symbols-outlined text-4xl text-secondary mb-4 group-hover:scale-110 transition-transform block">public</span>
+            <p class="font-label-caps text-xs text-on-surface-variant mb-2">FACEBOOK</p>
+            <p class="text-on-surface font-semibold">Elite English Official</p>
+        </a>
+        <a href="mailto:admissions@elite.edu" class="glass-card p-8 rounded-2xl group text-center hover:border-secondary transition-all">
+            <span class="material-symbols-outlined text-4xl text-secondary mb-4 group-hover:scale-110 transition-transform block">mail</span>
+            <p class="font-label-caps text-xs text-on-surface-variant mb-2">EMAIL</p>
+            <p class="text-on-surface font-semibold">admissions@elite.edu</p>
+        </a>
+    </div>
+
+    <!-- Contact Form -->
+    <div class="glass-card p-8 md:p-12 rounded-2xl max-w-2xl mx-auto">
+        <h3 class="font-headline-md text-2xl text-secondary mb-6 text-center font-['EB_Garamond']">Send Us a Message</h3>
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="font-label-caps text-xs text-secondary block mb-2">YOUR NAME</label>
+                    <input type="text" name="name" required 
+                           class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none">
+                </div>
+                <div>
+                    <label class="font-label-caps text-xs text-secondary block mb-2">EMAIL</label>
+                    <input type="email" name="email" required 
+                           class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">PHONE</label>
+                <input type="tel" name="phone" required 
+                       class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none">
+            </div>
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">MESSAGE</label>
+                <textarea name="message" required rows="4" 
+                          class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none"></textarea>
+            </div>
+            <button type="submit" 
+                    class="w-full bg-secondary text-on-secondary py-4 rounded-xl font-label-caps text-sm font-bold tracking-[0.2em] hover:shadow-[0_0_30px_rgba(233,193,118,0.4)] transition-all">
+                SEND MESSAGE
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

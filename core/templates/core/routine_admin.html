@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Manage Routines{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <h1 class="font-display-lg text-3xl md:text-4xl text-secondary font-['EB_Garamond']">Manage Routines</h1>
+        <a href="{% url 'routine_add' %}" class="bg-secondary text-on-secondary px-8 py-3 rounded-full font-label-caps text-sm font-bold hover:shadow-[0_0_20px_rgba(233,193,118,0.4)] transition-all">
+            + Add Routine
+        </a>
+    </div>
+
+    <div class="glass-card p-6 rounded-2xl overflow-x-auto">
+        <table class="w-full">
+            <thead>
+                <tr class="border-b border-white/10">
+                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Class</th>
+                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Day</th>
+                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Subject</th>
+                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Topic</th>
+                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for routine in routines %}
+                <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <td class="py-3 text-on-surface">{{ routine.class_obj.name }}</td>
+                    <td class="py-3 text-on-surface-variant text-sm">{{ routine.day }}</td>
+                    <td class="py-3 text-on-surface">{{ routine.subject }}</td>
+                    <td class="py-3 text-on-surface-variant text-sm">{{ routine.topic|default:"-" }}</td>
+                    <td class="py-3 text-on-surface-variant text-sm">{{ routine.start_time|time:"g:i A" }} - {{ routine.end_time|time:"g:i A" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="py-8 text-on-surface-variant text-center">No routines added yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

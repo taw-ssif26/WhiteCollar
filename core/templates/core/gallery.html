@@ -1,0 +1,45 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Gallery{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-7xl mx-auto">
+    <div class="text-center mb-12">
+        <h2 class="font-display-lg text-4xl md:text-5xl text-secondary font-['EB_Garamond']">The Elite Life</h2>
+        <p class="text-on-surface-variant mt-4">A glimpse into our prestigious learning environment</p>
+    </div>
+
+    <div class="columns-1 sm:columns-2 md:columns-3 gap-6 space-y-6">
+        {% for image in images %}
+        <div class="glass-card p-2 rounded-xl break-inside-avoid overflow-hidden group">
+            <img src="{{ image.image.url }}" alt="{{ image.title }}" 
+                 class="rounded-lg w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105">
+            {% if image.title %}
+            <div class="p-3">
+                <p class="text-on-surface-variant text-sm">{{ image.title }}</p>
+            </div>
+            {% endif %}
+            {% if user.is_superuser or user.is_staff %}
+            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <a href="{% url 'gallery_delete' image.id %}" 
+                   class="bg-red-500/80 text-white p-2 rounded-full hover:bg-red-500 transition-colors"
+                   onclick="return confirm('Delete this image?')">
+                    <span class="material-symbols-outlined text-sm">delete</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% empty %}
+        <p class="text-on-surface-variant col-span-full text-center">No images in the gallery yet.</p>
+        {% endfor %}
+    </div>
+
+    {% if user.is_superuser or user.is_staff %}
+    <div class="mt-12 flex justify-center">
+        <a href="{% url 'gallery_add' %}" class="bg-secondary text-on-secondary px-8 py-3 rounded-full font-label-caps text-sm font-bold hover:shadow-[0_0_20px_rgba(233,193,118,0.4)] transition-all">
+            + Add Image
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

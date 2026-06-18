@@ -1,0 +1,59 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Request Invoice{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-3xl mx-auto">
+    <div class="text-center mb-12">
+        <h2 class="font-display-lg text-4xl md:text-5xl text-secondary font-['EB_Garamond']">Request Invoice</h2>
+        <p class="text-on-surface-variant mt-4">Request a monthly invoice for your tuition fees</p>
+    </div>
+
+    <div class="glass-card p-8 md:p-12 rounded-3xl">
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="font-label-caps text-xs text-secondary block mb-2">MONTH</label>
+                    <select name="month" required 
+                            class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none appearance-none">
+                        <option value="" class="bg-surface-container-high">Select Month</option>
+                        <option value="January" class="bg-surface-container-high">January</option>
+                        <option value="February" class="bg-surface-container-high">February</option>
+                        <option value="March" class="bg-surface-container-high">March</option>
+                        <option value="April" class="bg-surface-container-high">April</option>
+                        <option value="May" class="bg-surface-container-high">May</option>
+                        <option value="June" class="bg-surface-container-high">June</option>
+                        <option value="July" class="bg-surface-container-high">July</option>
+                        <option value="August" class="bg-surface-container-high">August</option>
+                        <option value="September" class="bg-surface-container-high">September</option>
+                        <option value="October" class="bg-surface-container-high">October</option>
+                        <option value="November" class="bg-surface-container-high">November</option>
+                        <option value="December" class="bg-surface-container-high">December</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="font-label-caps text-xs text-secondary block mb-2">YEAR</label>
+                    <select name="year" required 
+                            class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none appearance-none">
+                        <option value="" class="bg-surface-container-high">Select Year</option>
+                        <option value="2024" class="bg-surface-container-high">2024</option>
+                        <option value="2025" class="bg-surface-container-high">2025</option>
+                        <option value="2026" class="bg-surface-container-high">2026</option>
+                    </select>
+                </div>
+            </div>
+            <div class="glass-card p-6 rounded-xl">
+                <div class="flex items-center justify-between">
+                    <span class="text-on-surface-variant">Monthly Fee</span>
+                    <span class="text-2xl text-secondary font-bold">$1,500.00</span>
+                </div>
+            </div>
+            <button type="submit" 
+                    class="w-full bg-secondary text-on-secondary py-4 rounded-xl font-label-caps text-sm font-bold tracking-[0.2em] hover:shadow-[0_0_30px_rgba(233,193,118,0.4)] transition-all">
+                REQUEST INVOICE
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

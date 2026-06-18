@@ -1,0 +1,46 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4 py-12">
+    <div class="glass-card p-8 md:p-12 rounded-3xl w-full max-w-md">
+        <div class="text-center mb-8">
+            <h2 class="font-display-lg text-3xl text-secondary font-['EB_Garamond']">Welcome Back</h2>
+            <p class="text-on-surface-variant text-sm mt-2">Sign in to access your dashboard</p>
+        </div>
+
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">STUDENT ID</label>
+                <input type="text" name="student_id" required 
+                       class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none"
+                       placeholder="Enter your student ID">
+            </div>
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">PASSWORD</label>
+                <input type="password" name="password" required 
+                       class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none"
+                       placeholder="Enter your password">
+            </div>
+            <div class="flex items-center justify-between text-sm">
+                <label class="flex items-center gap-2 text-on-surface-variant">
+                    <input type="checkbox" class="rounded border-white/10 bg-surface-container-highest/30">
+                    Remember me
+                </label>
+                <a href="#" class="text-secondary hover:underline">Forgot password?</a>
+            </div>
+            <button type="submit" 
+                    class="w-full bg-secondary text-on-secondary py-4 rounded-xl font-label-caps text-sm font-bold tracking-[0.2em] hover:shadow-[0_0_30px_rgba(233,193,118,0.4)] transition-all">
+                SIGN IN
+            </button>
+        </form>
+
+        <div class="mt-8 text-center text-on-surface-variant text-sm">
+            <p>Don't have an account? <a href="{% url 'admission_view' %}" class="text-secondary hover:underline">Contact admin</a></p>
+            <p class="mt-2 text-xs opacity-60">Student ID and password provided by the coaching</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

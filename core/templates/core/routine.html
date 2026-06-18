@@ -1,0 +1,30 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Class Routine{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-7xl mx-auto">
+    <div class="text-center mb-12">
+        <h2 class="font-display-lg text-4xl md:text-5xl text-secondary font-['EB_Garamond']">Weekly Routine</h2>
+        <p class="text-on-surface-variant mt-4">Your class schedule for the week</p>
+    </div>
+
+    <div class="glass-card p-8 rounded-2xl">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for routine in routines %}
+            <div class="bg-surface-container-highest/30 rounded-xl p-5 border border-white/5">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="font-label-caps text-xs text-secondary tracking-widest">{{ routine.day }}</span>
+                    <span class="text-xs text-on-surface-variant">{{ routine.start_time|time:"g:i A" }} - {{ routine.end_time|time:"g:i A" }}</span>
+                </div>
+                <h4 class="font-headline-md text-lg text-on-surface">{{ routine.subject }}</h4>
+                <p class="text-on-surface-variant text-sm mt-1">{{ routine.topic|default:"General Class" }}</p>
+                <div class="mt-3 text-xs text-on-surface-variant">{{ routine.class_obj.name }} - {{ routine.class_obj.section }}</div>
+            </div>
+            {% empty %}
+            <p class="text-on-surface-variant col-span-full text-center">No routine available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

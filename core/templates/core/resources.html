@@ -1,0 +1,49 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Resources{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-7xl mx-auto">
+    <div class="text-center mb-12">
+        <h2 class="font-display-lg text-4xl md:text-5xl text-secondary font-['EB_Garamond']">Learning Resources</h2>
+        <p class="text-on-surface-variant mt-4">Curated materials to support your academic journey</p>
+    </div>
+
+    {% if user.is_superuser or user.is_staff %}
+    <div class="mb-8 flex justify-center">
+        <a href="{% url 'resource_add' %}" class="bg-secondary text-on-secondary px-8 py-3 rounded-full font-label-caps text-sm font-bold hover:shadow-[0_0_20px_rgba(233,193,118,0.4)] transition-all">
+            + Add Resource
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for resource in resources %}
+        <div class="glass-card p-6 rounded-2xl group">
+            <div class="flex items-start justify-between">
+                <span class="material-symbols-outlined text-3xl text-secondary">
+                    {% if resource.file_type == 'pdf' %}description
+                    {% elif resource.file_type == 'video' %}play_circle
+                    {% elif resource.file_type == 'link' %}link
+                    {% else %}folder{% endif %}
+                </span>
+                <span class="font-label-caps text-xs text-on-surface-variant bg-surface-container-high px-3 py-1 rounded-full">
+                    {{ resource.file_type|upper }}
+                </span>
+            </div>
+            <h4 class="font-headline-md text-xl text-on-surface mt-4 group-hover:text-secondary transition-colors">{{ resource.title }}</h4>
+            <p class="text-on-surface-variant text-sm mt-2">{{ resource.description|truncatewords:15 }}</p>
+            <div class="mt-4">
+                {% if resource.file_type == 'link' and resource.file_url %}
+                <a href="{{ resource.file_url }}" target="_blank" class="text-secondary text-sm hover:underline">Open Link →</a>
+                {% elif resource.file_upload %}
+                <a href="{{ resource.file_upload.url }}" target="_blank" class="text-secondary text-sm hover:underline">Download →</a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-on-surface-variant col-span-full text-center">No resources available yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

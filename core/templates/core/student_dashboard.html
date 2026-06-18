@@ -1,0 +1,180 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-7xl mx-auto">
+    <!-- Welcome Section -->
+    <div class="glass-card p-8 rounded-2xl mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h1 class="font-display-lg text-3xl md:text-4xl text-secondary font-['EB_Garamond']">
+                    Welcome, {{ student.name }}
+                </h1>
+                <p class="text-on-surface-variant mt-2">Student ID: {{ student.student_id }} | Class: {{ student.class_name }}</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="#profile" class="glass-card px-6 py-2 rounded-full text-sm hover:border-secondary transition-all">Profile</a>
+                <a href="{% url 'logout' %}" class="glass-card px-6 py-2 rounded-full text-sm hover:border-red-500/50 transition-all">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="glass-card p-6 rounded-xl text-center">
+            <div class="text-3xl text-secondary font-bold">{{ attendance_percentage|floatformat:1 }}%</div>
+            <div class="text-on-surface-variant text-sm mt-2">Attendance</div>
+        </div>
+        <div class="glass-card p-6 rounded-xl text-center">
+            <div class="text-3xl text-secondary font-bold">{{ results.count }}</div>
+            <div class="text-on-surface-variant text-sm mt-2">Exams Taken</div>
+        </div>
+        <div class="glass-card p-6 rounded-xl text-center">
+            <div class="text-3xl text-secondary font-bold">{{ invoices.count }}</div>
+            <div class="text-on-surface-variant text-sm mt-2">Invoices</div>
+        </div>
+        <div class="glass-card p-6 rounded-xl text-center">
+            <div class="text-3xl text-secondary font-bold">{{ routine.count }}</div>
+            <div class="text-on-surface-variant text-sm mt-2">Classes/Week</div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Performance Graph -->
+        <div class="glass-card p-8 rounded-2xl">
+            <h3 class="font-headline-md text-2xl text-secondary mb-6 font-['EB_Garamond']">Performance Trend</h3>
+            <canvas id="performanceChart" height="200"></canvas>
+        </div>
+
+        <!-- Recent Results -->
+        <div class="glass-card p-8 rounded-2xl">
+            <h3 class="font-headline-md text-2xl text-secondary mb-6 font-['EB_Garamond']">Recent Results</h3>
+            <div class="space-y-4">
+                {% for result in results|slice:":5" %}
+                <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                    <div>
+                        <div class="text-on-surface font-semibold">{{ result.exam_name }}</div>
+                        <div class="text-on-surface-variant text-sm">{{ result.subject }}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-secondary font-bold">{{ result.marks }}/{{ result.total_marks }}</div>
+                        <div class="text-on-surface-variant text-sm">{{ result.percentage|floatformat:1 }}%</div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-on-surface-variant">No results available yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Section -->
+    <div id="profile" class="glass-card p-8 rounded-2xl mt-8">
+        <h3 class="font-headline-md text-2xl text-secondary mb-6 font-['EB_Garamond']">My Profile</h3>
+        <form method="POST" action="{% url 'update_profile' %}" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% csrf_token %}
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">Full Name</label>
+                <input type="text" name="name" value="{{ student.name }}" 
+                       class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-3 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none">
+            </div>
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">Email</label>
+                <input type="email" name="email" value="{{ student.email }}" 
+                       class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-3 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none">
+            </div>
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">Phone</label>
+                <input type="tel" name="phone" value="{{ student.phone }}" 
+                       class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-3 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none">
+            </div>
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">Guardian's Phone</label>
+                <input type="tel" name="guardian_phone" value="{{ student.guardian_phone }}" 
+                       class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-3 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none">
+            </div>
+            <div class="md:col-span-2">
+                <button type="submit" class="bg-secondary text-on-secondary px-8 py-3 rounded-full font-label-caps text-sm font-bold hover:shadow-[0_0_20px_rgba(233,193,118,0.4)] transition-all">
+                    Update Profile
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Routine -->
+    <div class="glass-card p-8 rounded-2xl mt-8">
+        <h3 class="font-headline-md text-2xl text-secondary mb-6 font-['EB_Garamond']">Weekly Routine</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for item in routine %}
+            <div class="bg-surface-container-highest/30 rounded-xl p-4 border border-white/5">
+                <div class="font-label-caps text-xs text-secondary">{{ item.day }}</div>
+                <div class="text-on-surface font-semibold mt-1">{{ item.subject }}</div>
+                <div class="text-on-surface-variant text-sm">{{ item.topic|default:"General Class" }}</div>
+                <div class="text-on-surface-variant text-xs mt-2">{{ item.start_time|time:"g:i A" }} - {{ item.end_time|time:"g:i A" }}</div>
+            </div>
+            {% empty %}
+            <p class="text-on-surface-variant col-span-full">No routine available yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Performance Chart
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    const examNames = {{ exam_names|safe }};
+    const examData = {{ exam_data|safe }};
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: examNames,
+            datasets: [{
+                label: 'Percentage',
+                data: examData,
+                borderColor: '#e9c176',
+                backgroundColor: 'rgba(233, 193, 118, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#e9c176',
+                pointBorderColor: '#0b1326',
+                pointBorderWidth: 2,
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#dae2fd'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        color: '#c5c6ce'
+                    },
+                    grid: {
+                        color: 'rgba(255,255,255,0.05)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#c5c6ce'
+                    },
+                    grid: {
+                        color: 'rgba(255,255,255,0.05)'
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

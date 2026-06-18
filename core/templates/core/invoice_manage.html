@@ -1,0 +1,60 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Manage Invoices{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <h1 class="font-display-lg text-3xl md:text-4xl text-secondary font-['EB_Garamond']">Manage Invoices</h1>
+        <a href="{% url 'admin_dashboard' %}" class="glass-card px-6 py-3 rounded-full text-sm hover:border-secondary transition-all">Back</a>
+    </div>
+
+    <div class="glass-card p-6 rounded-2xl overflow-x-auto">
+        <table class="w-full">
+            <thead>
+                <tr class="border-b border-white/10">
+                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Student</th>
+                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Month</th>
+                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Amount</th>
+                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Status</th>
+                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <td class="py-3 text-on-surface">{{ invoice.student.name }}</td>
+                    <td class="py-3 text-on-surface-variant text-sm">{{ invoice.month }} {{ invoice.year }}</td>
+                    <td class="py-3 text-on-surface">${{ invoice.amount }}</td>
+                    <td class="py-3">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold 
+                            {% if invoice.status == 'pending' %}bg-yellow-500/20 text-yellow-400
+                            {% elif invoice.status == 'approved' %}bg-blue-500/20 text-blue-400
+                            {% elif invoice.status == 'paid' %}bg-green-500/20 text-green-400
+                            {% else %}bg-red-500/20 text-red-400{% endif %}">
+                            {{ invoice.status|title }}
+                        </span>
+                    </td>
+                    <td class="py-3">
+                        <div class="flex gap-2 flex-wrap">
+                            {% if invoice.status == 'pending' %}
+                            <a href="{% url 'invoice_approve' invoice.id %}" class="text-secondary hover:underline text-sm">Approve</a>
+                            {% elif invoice.status == 'approved' %}
+                            <a href="{% url 'invoice_mark_paid' invoice.id %}" class="text-green-400 hover:text-green-500 text-sm">Mark Paid</a>
+                            {% endif %}
+                            {% if invoice.pdf_file %}
+                            <a href="{{ invoice.pdf_file.url }}" target="_blank" class="text-secondary hover:underline text-sm">PDF</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="py-8 text-on-surface-variant text-center">No invoices found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

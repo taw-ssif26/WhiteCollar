@@ -1,0 +1,79 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Teacher{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <!-- Profile Image & Basic Info -->
+        <div>
+            <div class="glass-card p-4 rounded-2xl relative">
+                <div class="absolute -top-10 -left-10 w-64 h-64 bg-secondary/10 rounded-full blur-[100px]"></div>
+                <div class="relative aspect-[4/5] rounded-xl overflow-hidden">
+                    {% if teacher.profile_image %}
+                    <img src="{{ teacher.profile_image.url }}" alt="{{ teacher.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="w-full h-full bg-surface-container-highest/50 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-8xl text-secondary/30">person</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="glass-card p-6 rounded-2xl mt-6 text-center">
+                <h2 class="font-display-lg text-3xl text-secondary font-['EB_Garamond']">{{ teacher.name }}</h2>
+                <p class="text-on-surface-variant">{{ teacher.designation }}</p>
+            </div>
+        </div>
+
+        <!-- Bio & Details -->
+        <div>
+            <h2 class="font-display-lg text-4xl text-secondary font-['EB_Garamond']">The Visionary</h2>
+            <h3 class="font-headline-md text-2xl text-on-surface mt-2">{{ teacher.name }}</h3>
+            
+            <div class="mt-6 space-y-6">
+                <div>
+                    <h4 class="font-label-caps text-xs text-secondary tracking-widest">BIOGRAPHY</h4>
+                    <div class="text-on-surface-variant leading-relaxed mt-2">{{ teacher.bio|safe }}</div>
+                </div>
+                
+                <div>
+                    <h4 class="font-label-caps text-xs text-secondary tracking-widest">EDUCATION</h4>
+                    <div class="text-on-surface-variant leading-relaxed mt-2">{{ teacher.education|safe }}</div>
+                </div>
+                
+                <div>
+                    <h4 class="font-label-caps text-xs text-secondary tracking-widest">EXPERIENCE</h4>
+                    <div class="text-on-surface-variant leading-relaxed mt-2">{{ teacher.experience|safe }}</div>
+                </div>
+                
+                <div>
+                    <h4 class="font-label-caps text-xs text-secondary tracking-widest">ACHIEVEMENTS</h4>
+                    <div class="text-on-surface-variant leading-relaxed mt-2">{{ teacher.achievements|safe }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline -->
+    {% if teacher.timeline %}
+    <div class="mt-16">
+        <h3 class="font-headline-md text-2xl text-secondary mb-8 font-['EB_Garamond'] text-center">Career Timeline</h3>
+        <div class="relative max-w-3xl mx-auto">
+            <div class="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-secondary/30"></div>
+            <div class="space-y-8">
+                {% for item in teacher.timeline|safe|split:"--" %}
+                <div class="flex items-center">
+                    <div class="w-1/2"></div>
+                    <div class="w-4 h-4 rounded-full bg-secondary border-4 border-surface z-10"></div>
+                    <div class="w-1/2 glass-card p-4 rounded-xl ml-4">
+                        <div class="text-on-surface-variant text-xs">--</div>
+                        <div class="text-on-surface">{{ item }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

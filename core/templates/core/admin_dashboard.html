@@ -1,0 +1,108 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-7xl mx-auto">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <h1 class="font-display-lg text-3xl md:text-4xl text-secondary font-['EB_Garamond']">Admin Dashboard</h1>
+        <div class="flex gap-3">
+            <a href="{% url 'front_page' %}" class="glass-card px-6 py-2 rounded-full text-sm hover:border-secondary transition-all">View Site</a>
+            <a href="{% url 'logout' %}" class="glass-card px-6 py-2 rounded-full text-sm hover:border-red-500/50 transition-all">Logout</a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="glass-card p-6 rounded-xl text-center">
+            <div class="text-3xl text-secondary font-bold">{{ total_students }}</div>
+            <div class="text-on-surface-variant text-sm mt-2">Total Students</div>
+            <a href="{% url 'student_list' %}" class="text-secondary text-xs hover:underline block mt-2">Manage →</a>
+        </div>
+        <div class="glass-card p-6 rounded-xl text-center">
+            <div class="text-3xl text-secondary font-bold">{{ pending_invoices }}</div>
+            <div class="text-on-surface-variant text-sm mt-2">Pending Invoices</div>
+            <a href="{% url 'invoice_manage' %}" class="text-secondary text-xs hover:underline block mt-2">Review →</a>
+        </div>
+        <div class="glass-card p-6 rounded-xl text-center">
+            <div class="text-3xl text-secondary font-bold">{{ total_events }}</div>
+            <div class="text-on-surface-variant text-sm mt-2">Total Events</div>
+            <a href="{% url 'events_view' %}" class="text-secondary text-xs hover:underline block mt-2">View →</a>
+        </div>
+        <div class="glass-card p-6 rounded-xl text-center">
+            <div class="text-3xl text-secondary font-bold">{{ absent_today }}</div>
+            <div class="text-on-surface-variant text-sm mt-2">Absent Today</div>
+            <a href="{% url 'attendance_manage' %}" class="text-secondary text-xs hover:underline block mt-2">Mark →</a>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="glass-card p-8 rounded-2xl mb-8">
+        <h3 class="font-headline-md text-2xl text-secondary mb-6 font-['EB_Garamond']">Quick Actions</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <a href="{% url 'student_add' %}" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
+                <span class="material-symbols-outlined text-2xl text-secondary block">person_add</span>
+                <span class="text-on-surface-variant text-xs">Add Student</span>
+            </a>
+            <a href="{% url 'event_add' %}" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
+                <span class="material-symbols-outlined text-2xl text-secondary block">add_event</span>
+                <span class="text-on-surface-variant text-xs">Add Event</span>
+            </a>
+            <a href="{% url 'result_add' %}" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
+                <span class="material-symbols-outlined text-2xl text-secondary block">grade</span>
+                <span class="text-on-surface-variant text-xs">Add Result</span>
+            </a>
+            <a href="{% url 'attendance_manage' %}" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
+                <span class="material-symbols-outlined text-2xl text-secondary block">checklist</span>
+                <span class="text-on-surface-variant text-xs">Attendance</span>
+            </a>
+            <a href="{% url 'routine_add' %}" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
+                <span class="material-symbols-outlined text-2xl text-secondary block">schedule</span>
+                <span class="text-on-surface-variant text-xs">Add Routine</span>
+            </a>
+            <a href="{% url 'resource_add' %}" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
+                <span class="material-symbols-outlined text-2xl text-secondary block">upload_file</span>
+                <span class="text-on-surface-variant text-xs">Add Resource</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Recent Students -->
+        <div class="glass-card p-8 rounded-2xl">
+            <h3 class="font-headline-md text-2xl text-secondary mb-4 font-['EB_Garamond']">Recent Students</h3>
+            <div class="space-y-3">
+                {% for student in recent_students|slice:":5" %}
+                <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                    <div>
+                        <div class="text-on-surface">{{ student.name }}</div>
+                        <div class="text-on-surface-variant text-xs">{{ student.student_id }} | {{ student.class_name }}</div>
+                    </div>
+                    <a href="{% url 'student_edit' student.id %}" class="text-secondary text-xs hover:underline">Edit</a>
+                </div>
+                {% empty %}
+                <p class="text-on-surface-variant">No students added yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Pending Invoices -->
+        <div class="glass-card p-8 rounded-2xl">
+            <h3 class="font-headline-md text-2xl text-secondary mb-4 font-['EB_Garamond']">Pending Invoices</h3>
+            <div class="space-y-3">
+                {% for invoice in recent_invoices|slice:":5" %}
+                <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                    <div>
+                        <div class="text-on-surface">{{ invoice.student.name }}</div>
+                        <div class="text-on-surface-variant text-xs">{{ invoice.month }} {{ invoice.year }} - ${{ invoice.amount }}</div>
+                    </div>
+                    <a href="{% url 'invoice_approve' invoice.id %}" class="text-secondary text-xs hover:underline">Approve</a>
+                </div>
+                {% empty %}
+                <p class="text-on-surface-variant">No pending invoices.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

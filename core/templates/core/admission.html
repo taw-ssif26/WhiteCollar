@@ -1,0 +1,76 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Admission{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-3xl mx-auto">
+    <div class="text-center mb-12">
+        <h2 class="font-display-lg text-4xl md:text-5xl text-secondary font-['EB_Garamond']">Request Enrollment</h2>
+        <p class="text-on-surface-variant mt-4">Secure your seat in our upcoming cohort. Selective admission applies.</p>
+    </div>
+
+    <div class="glass-card p-8 md:p-12 rounded-3xl">
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="font-label-caps text-xs text-secondary block mb-2">FULL NAME *</label>
+                    <input type="text" name="name" required 
+                           class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none">
+                </div>
+                <div>
+                    <label class="font-label-caps text-xs text-secondary block mb-2">CLASS *</label>
+                    <input type="text" name="class_name" required 
+                           class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none"
+                           placeholder="e.g., Class 10, IELTS">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="font-label-caps text-xs text-secondary block mb-2">SCHOOL ROLL</label>
+                    <input type="text" name="roll" 
+                           class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none">
+                </div>
+                <div>
+                    <label class="font-label-caps text-xs text-secondary block mb-2">EMAIL *</label>
+                    <input type="email" name="email" required 
+                           class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="font-label-caps text-xs text-secondary block mb-2">CONTACT NUMBER *</label>
+                    <input type="tel" name="phone" required 
+                           class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none">
+                </div>
+                <div>
+                    <label class="font-label-caps text-xs text-secondary block mb-2">GUARDIAN'S NUMBER *</label>
+                    <input type="tel" name="guardian_phone" required 
+                           class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none">
+                </div>
+            </div>
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">CURRENT SCHOOL/COLLEGE *</label>
+                <input type="text" name="school_name" required 
+                       class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none">
+            </div>
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">HOW DID YOU HEAR ABOUT US? *</label>
+                <select name="heard_from" required 
+                        class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none appearance-none">
+                    <option value="" class="bg-surface-container-high">Select an option</option>
+                    <option value="social_media" class="bg-surface-container-high">Social Media</option>
+                    <option value="alumni" class="bg-surface-container-high">Alumni Recommendation</option>
+                    <option value="event" class="bg-surface-container-high">Event</option>
+                    <option value="online" class="bg-surface-container-high">Online Advertisement</option>
+                    <option value="other" class="bg-surface-container-high">Other</option>
+                </select>
+            </div>
+            <button type="submit" 
+                    class="w-full bg-secondary text-on-secondary py-5 rounded-xl font-label-caps text-sm font-bold tracking-[0.2em] hover:shadow-[0_0_30px_rgba(233,193,118,0.4)] transition-all">
+                SUBMIT ENROLLMENT REQUEST
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

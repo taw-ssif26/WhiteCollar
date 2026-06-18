@@ -1,0 +1,31 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-3xl mx-auto">
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{% url 'results_view' %}" class="text-secondary hover:underline">← Back</a>
+        <h1 class="font-display-lg text-3xl md:text-4xl text-secondary font-['EB_Garamond']">{{ title }}</h1>
+    </div>
+
+    <div class="glass-card p-8 md:p-12 rounded-3xl">
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            {% for field in form %}
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">{{ field.label|upper }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <p class="text-red-400 text-sm mt-1">{{ field.errors.0 }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" 
+                    class="w-full bg-secondary text-on-secondary py-4 rounded-xl font-label-caps text-sm font-bold tracking-[0.2em] hover:shadow-[0_0_30px_rgba(233,193,118,0.4)] transition-all">
+                {{ title|upper }}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
