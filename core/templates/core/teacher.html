@@ -1,4 +1,5 @@
 {% extends 'core/base.html' %}
+{% load custom_filters %}
 
 {% block title %}Teacher{% endblock %}
 
@@ -31,25 +32,33 @@
             <h3 class="font-headline-md text-2xl text-on-surface mt-2">{{ teacher.name }}</h3>
             
             <div class="mt-6 space-y-6">
+                {% if teacher.bio %}
                 <div>
                     <h4 class="font-label-caps text-xs text-secondary tracking-widest">BIOGRAPHY</h4>
                     <div class="text-on-surface-variant leading-relaxed mt-2">{{ teacher.bio|safe }}</div>
                 </div>
+                {% endif %}
                 
+                {% if teacher.education %}
                 <div>
                     <h4 class="font-label-caps text-xs text-secondary tracking-widest">EDUCATION</h4>
                     <div class="text-on-surface-variant leading-relaxed mt-2">{{ teacher.education|safe }}</div>
                 </div>
+                {% endif %}
                 
+                {% if teacher.experience %}
                 <div>
                     <h4 class="font-label-caps text-xs text-secondary tracking-widest">EXPERIENCE</h4>
                     <div class="text-on-surface-variant leading-relaxed mt-2">{{ teacher.experience|safe }}</div>
                 </div>
+                {% endif %}
                 
+                {% if teacher.achievements %}
                 <div>
                     <h4 class="font-label-caps text-xs text-secondary tracking-widest">ACHIEVEMENTS</h4>
                     <div class="text-on-surface-variant leading-relaxed mt-2">{{ teacher.achievements|safe }}</div>
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -61,13 +70,13 @@
         <div class="relative max-w-3xl mx-auto">
             <div class="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-secondary/30"></div>
             <div class="space-y-8">
-                {% for item in teacher.timeline|safe|split:"--" %}
+                {% for item in teacher.timeline|split:"--" %}
                 <div class="flex items-center">
                     <div class="w-1/2"></div>
                     <div class="w-4 h-4 rounded-full bg-secondary border-4 border-surface z-10"></div>
                     <div class="w-1/2 glass-card p-4 rounded-xl ml-4">
-                        <div class="text-on-surface-variant text-xs">--</div>
-                        <div class="text-on-surface">{{ item }}</div>
+                        <div class="text-on-surface-variant text-xs">•</div>
+                        <div class="text-on-surface">{{ item|safe }}</div>
                     </div>
                 </div>
                 {% endfor %}
