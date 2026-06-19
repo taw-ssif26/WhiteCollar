@@ -43,14 +43,30 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <!-- Performance Graph -->
         <div class="glass-card p-8 rounded-2xl">
-            <h3 class="font-headline-md text-2xl text-secondary mb-6 font-['EB_Garamond']">Performance Trend</h3>
-            <a href="{% url 'results_view' %}" class="text-secondary text-sm hover:underline">View All →</a>
-            <canvas id="performanceChart" height="200"></canvas>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-headline-md text-2xl text-secondary font-['EB_Garamond']">Performance Trend</h3>
+                <div class="flex items-center gap-3">
+                    <span class="text-on-surface-variant text-xs">Last {{ exam_names|length }} exams</span>
+                    <a href="{% url 'results_view' %}" class="text-secondary text-sm hover:underline flex items-center gap-1">
+                        View All <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    </a>
+                </div>
+            </div>
+            <div class="w-full overflow-hidden" style="max-width: 100%;">
+                <div style="position: relative; height: 250px; width: 100%;">
+                    <canvas id="performanceChart" style="width: 100% !important; height: 100% !important;"></canvas>
+                </div>
+            </div>
         </div>
 
         <!-- Recent Results -->
         <div class="glass-card p-8 rounded-2xl">
-            <h3 class="font-headline-md text-2xl text-secondary mb-6 font-['EB_Garamond']">Recent Results</h3>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-headline-md text-2xl text-secondary font-['EB_Garamond']">Recent Results</h3>
+                <a href="{% url 'results_view' %}" class="text-secondary text-sm hover:underline flex items-center gap-1">
+                    View All <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
+            </div>
             <div class="space-y-4">
                 {% for result in results|slice:":5" %}
                 <div class="flex items-center justify-between border-b border-white/5 pb-3">
@@ -105,7 +121,12 @@
 
     <!-- Routine -->
     <div class="glass-card p-8 rounded-2xl mt-8">
-        <h3 class="font-headline-md text-2xl text-secondary mb-6 font-['EB_Garamond']">Weekly Routine</h3>
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-headline-md text-2xl text-secondary font-['EB_Garamond']">Weekly Routine</h3>
+            <a href="{% url 'routine_view' %}" class="text-secondary text-sm hover:underline flex items-center gap-1">
+                View All <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </a>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {% for item in routine %}
             <div class="bg-surface-container-highest/30 rounded-xl p-4 border border-white/5">
@@ -119,6 +140,37 @@
             {% endfor %}
         </div>
     </div>
+
+    <!-- Invoices -->
+    <div class="glass-card p-8 rounded-2xl mt-8">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="font-headline-md text-2xl text-secondary font-['EB_Garamond']">Recent Invoices</h3>
+            <a href="{% url 'invoice_request' %}" class="text-secondary text-sm hover:underline flex items-center gap-1">
+                Request New <span class="material-symbols-outlined text-sm">add</span>
+            </a>
+        </div>
+        <div class="space-y-3">
+            {% for invoice in invoices %}
+            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                <div>
+                    <div class="text-on-surface">{{ invoice.month }} {{ invoice.year }}</div>
+                    <div class="text-on-surface-variant text-xs">Amount: ${{ invoice.amount }}</div>
+                </div>
+                <div>
+                    <span class="px-3 py-1 rounded-full text-xs font-bold 
+                        {% if invoice.status == 'pending' %}bg-yellow-500/20 text-yellow-400
+                        {% elif invoice.status == 'approved' %}bg-blue-500/20 text-blue-400
+                        {% elif invoice.status == 'paid' %}bg-green-500/20 text-green-400
+                        {% else %}bg-red-500/20 text-red-400{% endif %}">
+                        {{ invoice.status|title }}
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-on-surface-variant">No invoices yet.</p>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -128,13 +180,18 @@
     const examNames = {{ exam_names|safe }};
     const examData = {{ exam_data|safe }};
     
+    // Limit to last 10 exams
+    const maxPoints = 10;
+    const labels = examNames.slice(-maxPoints);
+    const data = examData.slice(-maxPoints);
+    
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: examNames,
+            labels: labels,
             datasets: [{
                 label: 'Percentage',
-                data: examData,
+                data: data,
                 borderColor: '#e9c176',
                 backgroundColor: 'rgba(233, 193, 118, 0.1)',
                 fill: true,
@@ -160,7 +217,8 @@
                     beginAtZero: true,
                     max: 100,
                     ticks: {
-                        color: '#c5c6ce'
+                        color: '#c5c6ce',
+                        stepSize: 20
                     },
                     grid: {
                         color: 'rgba(255,255,255,0.05)'
@@ -168,7 +226,11 @@
                 },
                 x: {
                     ticks: {
-                        color: '#c5c6ce'
+                        color: '#c5c6ce',
+                        maxRotation: 45,
+                        font: {
+                            size: 10
+                        }
                     },
                     grid: {
                         color: 'rgba(255,255,255,0.05)'
