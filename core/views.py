@@ -137,7 +137,7 @@ Heard From: {form.cleaned_data['heard_from']}
 # STUDENT DASHBOARD VIEWS
 # ============================================
 
-# core/views.py - Replace your student_dashboard function with this
+# core/views.py - Complete fixed function
 
 @login_required
 def student_dashboard(request):
@@ -146,31 +146,31 @@ def student_dashboard(request):
     
     student = request.user.student
     
-    # ✅ FIXED: Filter first, then slice
     # All attendances for counting
     all_attendances = student.attendances.all()
     total_days = all_attendances.count()
     present_days = all_attendances.filter(status='present').count()
     attendance_percentage = (present_days / total_days * 100) if total_days > 0 else 0
     
-    # Recent attendances for display (sliced after filter)
+    # Recent attendances for display
     attendances = all_attendances[:10]
     
-    # Recent results
+    # Recent results (for the list)
     results = student.results.all().order_by('-exam_date')[:5]
+    
+    # ✅ FIXED: Only last 10 exams for graph
+    graph_results = student.results.all().order_by('exam_date')[:10]
+    exam_names = []
+    exam_data = []
+    for result in graph_results:
+        exam_names.append(result.exam_name)
+        exam_data.append(result.percentage)
     
     # Recent invoices
     invoices = student.invoices.all().order_by('-generated_date')[:5]
     
     # Routine
     routine = Routine.objects.filter(class_obj__name=student.class_name)
-    
-    # Exam data for graph
-    exam_names = []
-    exam_data = []
-    for result in student.results.all():
-        exam_names.append(result.exam_name)
-        exam_data.append(result.percentage)
     
     context = {
         'student': student,
@@ -183,7 +183,6 @@ def student_dashboard(request):
         'exam_data': json.dumps(exam_data),
     }
     return render(request, 'core/student_dashboard.html', context)
-
 @login_required
 def update_profile(request):
     if not hasattr(request.user, 'student'):
