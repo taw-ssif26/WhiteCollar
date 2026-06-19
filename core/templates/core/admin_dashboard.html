@@ -1,3 +1,4 @@
+<!-- core/templates/core/admin_dashboard.html -->
 {% extends 'core/base.html' %}
 
 {% block title %}Admin Dashboard{% endblock %}
@@ -40,6 +41,7 @@
     <div class="glass-card p-8 rounded-2xl mb-8">
         <h3 class="font-headline-md text-2xl text-secondary mb-6 font-['EB_Garamond']">Quick Actions</h3>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <!-- ✅ FIXED: Using {% url 'student_add' %} -->
             <a href="{% url 'student_add' %}" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
                 <span class="material-symbols-outlined text-2xl text-secondary block">person_add</span>
                 <span class="text-on-surface-variant text-xs">Add Student</span>
@@ -67,41 +69,21 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Recent Students -->
-        <div class="glass-card p-8 rounded-2xl">
-            <h3 class="font-headline-md text-2xl text-secondary mb-4 font-['EB_Garamond']">Recent Students</h3>
-            <div class="space-y-3">
-                {% for student in recent_students|slice:":5" %}
-                <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                    <div>
-                        <div class="text-on-surface">{{ student.name }}</div>
-                        <div class="text-on-surface-variant text-xs">{{ student.student_id }} | {{ student.class_name }}</div>
-                    </div>
-                    <a href="{% url 'student_edit' student.id %}" class="text-secondary text-xs hover:underline">Edit</a>
+    <!-- Recent Students -->
+    <div class="glass-card p-8 rounded-2xl">
+        <h3 class="font-headline-md text-2xl text-secondary mb-4 font-['EB_Garamond']">Recent Students</h3>
+        <div class="space-y-3">
+            {% for student in recent_students|slice:":5" %}
+            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+                <div>
+                    <div class="text-on-surface">{{ student.name }}</div>
+                    <div class="text-on-surface-variant text-xs">{{ student.student_id }} | {{ student.class_name }}</div>
                 </div>
-                {% empty %}
-                <p class="text-on-surface-variant">No students added yet.</p>
-                {% endfor %}
+                <a href="{% url 'student_edit' student.id %}" class="text-secondary text-xs hover:underline">Edit</a>
             </div>
-        </div>
-
-        <!-- Pending Invoices -->
-        <div class="glass-card p-8 rounded-2xl">
-            <h3 class="font-headline-md text-2xl text-secondary mb-4 font-['EB_Garamond']">Pending Invoices</h3>
-            <div class="space-y-3">
-                {% for invoice in recent_invoices|slice:":5" %}
-                <div class="flex items-center justify-between border-b border-white/5 pb-3">
-                    <div>
-                        <div class="text-on-surface">{{ invoice.student.name }}</div>
-                        <div class="text-on-surface-variant text-xs">{{ invoice.month }} {{ invoice.year }} - ${{ invoice.amount }}</div>
-                    </div>
-                    <a href="{% url 'invoice_approve' invoice.id %}" class="text-secondary text-xs hover:underline">Approve</a>
-                </div>
-                {% empty %}
-                <p class="text-on-surface-variant">No pending invoices.</p>
-                {% endfor %}
-            </div>
+            {% empty %}
+            <p class="text-on-surface-variant">No students added yet. <a href="{% url 'student_add' %}" class="text-secondary hover:underline">Add your first student →</a></p>
+            {% endfor %}
         </div>
     </div>
 </div>
