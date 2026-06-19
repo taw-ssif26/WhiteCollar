@@ -137,8 +137,6 @@ Heard From: {form.cleaned_data['heard_from']}
 # STUDENT DASHBOARD VIEWS
 # ============================================
 
-# core/views.py - Complete fixed function
-
 @login_required
 def student_dashboard(request):
     if not hasattr(request.user, 'student'):
@@ -155,22 +153,22 @@ def student_dashboard(request):
     # Recent attendances for display
     attendances = all_attendances[:10]
     
-    # Recent results (for the list)
+    # Recent results
     results = student.results.all().order_by('-exam_date')[:5]
-    
-    # ✅ FIXED: Only last 10 exams for graph
-    graph_results = student.results.all().order_by('exam_date')[:10]
-    exam_names = []
-    exam_data = []
-    for result in graph_results:
-        exam_names.append(result.exam_name)
-        exam_data.append(result.percentage)
     
     # Recent invoices
     invoices = student.invoices.all().order_by('-generated_date')[:5]
     
     # Routine
     routine = Routine.objects.filter(class_obj__name=student.class_name)
+    
+    # ✅ FIXED: Limit graph to last 10 exams
+    graph_results = student.results.all().order_by('exam_date')[:10]
+    exam_names = []
+    exam_data = []
+    for result in graph_results:
+        exam_names.append(result.exam_name)
+        exam_data.append(result.percentage)
     
     context = {
         'student': student,
@@ -183,6 +181,7 @@ def student_dashboard(request):
         'exam_data': json.dumps(exam_data),
     }
     return render(request, 'core/student_dashboard.html', context)
+
 @login_required
 def update_profile(request):
     if not hasattr(request.user, 'student'):
