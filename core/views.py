@@ -209,14 +209,28 @@ def routine_view(request):
         routines = Routine.objects.filter(class_obj__name=student.class_name)
         return render(request, 'core/routine.html', {'routines': routines})
 
+# core/views.py - Update invoice_request function
+
 @login_required
 def invoice_request(request):
     if request.method == 'POST':
         student = request.user.student
         month = request.POST.get('month')
         year = request.POST.get('year')
+        amount = request.POST.get('amount', '1500')
+        description = request.POST.get('description', 'Monthly Tuition Fee')
         
-        # Check if invoice already exists
+        # Validate amount
+        try:
+            amount = float(amount)
+            if amount <= 0:
+                messages.error(request, 'Amount must be greater than 0')
+                return redirect('invoice_request')
+        except ValueError:
+            messages.error(request, 'Please enter a valid amount')
+            return redirect('invoice_request')
+        
+        # Check if invoice already exists for this month
         existing = Invoice.objects.filter(
             student=student,
             month=month,
@@ -227,13 +241,14 @@ def invoice_request(request):
             messages.warning(request, 'Invoice already exists for this month')
             return redirect('student_dashboard')
         
-        Invoice.objects.create(
+        invoice = Invoice.objects.create(
             student=student,
             month=month,
             year=year,
-            amount=1500.00
+            amount=amount,
+            description=description
         )
-        messages.success(request, 'Invoice requested successfully! Waiting for admin approval.')
+        messages.success(request, f'Invoice for BDT {amount} requested successfully! Waiting for admin approval.')
         return redirect('student_dashboard')
     
     return render(request, 'core/invoice_request.html')
