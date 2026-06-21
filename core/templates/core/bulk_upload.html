@@ -1,0 +1,49 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Bulk Upload Students{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-4xl mx-auto">
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{% url 'student_list' %}" class="text-secondary hover:underline">← Back</a>
+        <h1 class="font-display-lg text-3xl md:text-4xl text-secondary font-['EB_Garamond']">Bulk Upload Students</h1>
+    </div>
+
+    <div class="glass-card p-8 md:p-12 rounded-3xl">
+        <div class="mb-8">
+            <h3 class="font-headline-md text-xl text-secondary mb-3">Upload Excel File</h3>
+            <p class="text-on-surface-variant text-sm">Upload an Excel file with student data. <a href="{% url 'download_template' %}" class="text-secondary hover:underline">Download template →</a></p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="border-2 border-dashed border-white/10 rounded-xl p-8 text-center hover:border-secondary/50 transition-all">
+                <input type="file" name="excel_file" accept=".xlsx,.xls" required 
+                       class="w-full cursor-pointer text-on-surface-variant file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:bg-secondary file:text-on-secondary file:font-bold file:cursor-pointer hover:file:shadow-[0_0_20px_rgba(233,193,118,0.4)]">
+                <p class="text-on-surface-variant text-xs mt-4">Supported formats: .xlsx, .xls</p>
+            </div>
+
+            <div class="flex flex-wrap gap-4">
+                <button type="submit" class="bg-secondary text-on-secondary px-8 py-3 rounded-full font-label-caps text-sm font-bold hover:shadow-[0_0_20px_rgba(233,193,118,0.4)] transition-all">
+                    Upload & Import
+                </button>
+                <a href="{% url 'student_list' %}" class="glass-card px-8 py-3 rounded-full text-sm hover:border-secondary transition-all">
+                    Cancel
+                </a>
+            </div>
+        </form>
+
+        <div class="mt-8 p-4 bg-surface-container-highest/30 rounded-xl border border-white/5">
+            <h4 class="font-label-caps text-xs text-secondary tracking-widest mb-2">📋 Instructions</h4>
+            <ul class="text-on-surface-variant text-sm space-y-1 list-disc list-inside">
+                <li>First row must be headers (see template)</li>
+                <li>Required columns: student_id, name, class_name, roll</li>
+                <li>Optional: email, phone, guardian_phone, section, school_name</li>
+                <li>Password defaults to: <code class="bg-surface-container-high px-2 py-0.5 rounded">student123</code></li>
+                <li>Max file size: 5MB</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
