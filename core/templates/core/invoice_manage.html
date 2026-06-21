@@ -6,7 +6,27 @@
 <div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-7xl mx-auto">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
         <h1 class="font-display-lg text-3xl md:text-4xl text-secondary font-['EB_Garamond']">Manage Invoices</h1>
-        <a href="{% url 'admin_dashboard' %}" class="glass-card px-6 py-3 rounded-full text-sm hover:border-secondary transition-all">Back</a>
+        <a href="{% url 'admin_dashboard' %}" class="glass-card px-6 py-2 rounded-full text-sm hover:border-secondary transition-all">Back</a>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="glass-card p-6 rounded-xl text-center">
+            <div class="text-3xl text-secondary font-bold">{{ invoices.count }}</div>
+            <div class="text-on-surface-variant text-sm mt-2">Total Invoices</div>
+        </div>
+        <div class="glass-card p-6 rounded-xl text-center">
+            <div class="text-3xl text-yellow-400 font-bold">{{ invoices|length }}</div>
+            <div class="text-on-surface-variant text-sm mt-2">Pending</div>
+        </div>
+        <div class="glass-card p-6 rounded-xl text-center">
+            <div class="text-3xl text-green-400 font-bold">{{ invoices|length }}</div>
+            <div class="text-on-surface-variant text-sm mt-2">Paid</div>
+        </div>
+        <div class="glass-card p-6 rounded-xl text-center">
+            <div class="text-3xl text-secondary font-bold">৳{{ total_amount|floatformat:0 }}</div>
+            <div class="text-on-surface-variant text-sm mt-2">Total Amount</div>
+        </div>
     </div>
 
     <div class="glass-card p-6 rounded-2xl overflow-x-auto">
@@ -16,6 +36,7 @@
                     <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Student</th>
                     <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Month</th>
                     <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Amount</th>
+                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Description</th>
                     <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Status</th>
                     <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Actions</th>
                 </tr>
@@ -25,7 +46,8 @@
                 <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
                     <td class="py-3 text-on-surface">{{ invoice.student.name }}</td>
                     <td class="py-3 text-on-surface-variant text-sm">{{ invoice.month }} {{ invoice.year }}</td>
-                    <td class="py-3 text-on-surface">${{ invoice.amount }}</td>
+                    <td class="py-3 text-on-surface font-semibold">৳{{ invoice.amount }}</td>
+                    <td class="py-3 text-on-surface-variant text-sm">{{ invoice.description|default:"-" }}</td>
                     <td class="py-3">
                         <span class="px-3 py-1 rounded-full text-xs font-bold 
                             {% if invoice.status == 'pending' %}bg-yellow-500/20 text-yellow-400
@@ -45,12 +67,13 @@
                             {% if invoice.pdf_file %}
                             <a href="{{ invoice.pdf_file.url }}" target="_blank" class="text-secondary hover:underline text-sm">PDF</a>
                             {% endif %}
+                            <a href="{% url 'invoice_download' invoice.id %}" class="text-blue-400 hover:text-blue-500 text-sm">Download</a>
                         </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="py-8 text-on-surface-variant text-center">No invoices found.</td>
+                    <td colspan="6" class="py-8 text-on-surface-variant text-center">No invoices found.</td>
                 </tr>
                 {% endfor %}
             </tbody>
