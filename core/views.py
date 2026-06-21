@@ -491,3 +491,26 @@ def resource_add(request):
     else:
         form = ResourceForm()
     return render(request, 'core/resource_form.html', {'form': form, 'title': 'Add Resource'})
+
+
+
+
+# core/views.py - Add this function
+
+@login_required
+def download_progress_report(request):
+    if not hasattr(request.user, 'student'):
+        return redirect('front_page')
+    
+    student = request.user.student
+    from .utils.progress_reports import generate_progress_report
+    
+    try:
+        filepath = generate_progress_report(student)
+        with open(filepath, 'rb') as f:
+            response = HttpResponse(f.read(), content_type='application/pdf')
+            response['Content-Disposition'] = f'inline; filename=progress_{student.student_id}.pdf'
+            return response
+    except Exception as e:
+        messages.error(request, f'Error generating report: {str(e)}')
+        return redirect('student_dashboard')
