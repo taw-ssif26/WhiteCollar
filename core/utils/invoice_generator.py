@@ -58,11 +58,12 @@ def generate_invoice_pdf(invoice):
         ['Class:', invoice.student.class_name],
         ['Month:', invoice.month],
         ['Year:', str(invoice.year)],
+        ['Description:', invoice.description or 'Monthly Tuition Fee'],
         ['', ''],
         ['', ''],
-        ['Tuition Fee:', f"${invoice.amount}"],
+        ['Tuition Fee:', f"BDT {invoice.amount:,.2f}"],  # ← BDT format
         ['', ''],
-        ['Total:', f"${invoice.amount}"],
+        ['Total:', f"BDT {invoice.amount:,.2f}"],  # ← BDT format
         ['', ''],
         ['Status:', invoice.status.upper()],
     ]
