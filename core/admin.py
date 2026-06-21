@@ -1,45 +1,48 @@
+# core/admin.py
 from django.contrib import admin
-from .models import *
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
+from .models import Student
+
+# Unregister default User admin
+admin.site.unregister(User)
+
+# Register custom User admin
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    list_display = ['username', 'email', 'first_name', 'last_name', 'is_staff']
+    search_fields = ['username', 'email']
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     list_display = ['student_id', 'name', 'class_name', 'roll', 'phone']
     search_fields = ['student_id', 'name', 'email']
     list_filter = ['class_name', 'section']
-
-@admin.register(Event)
-class EventAdmin(admin.ModelAdmin):
-    list_display = ['title', 'date', 'event_type', 'location']
-    list_filter = ['event_type']
-
-@admin.register(Achievement)
-class AchievementAdmin(admin.ModelAdmin):
-    list_display = ['title', 'date']
-
-@admin.register(Gallery)
-class GalleryAdmin(admin.ModelAdmin):
-    list_display = ['title', 'uploaded_date']
-
-@admin.register(Result)
-class ResultAdmin(admin.ModelAdmin):
-    list_display = ['student', 'exam_name', 'subject', 'percentage', 'grade']
-
-@admin.register(Invoice)
-class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ['student', 'month', 'year', 'amount', 'status']
-    list_filter = ['status', 'month']
-
-@admin.register(Attendance)
-class AttendanceAdmin(admin.ModelAdmin):
-    list_display = ['student', 'date', 'status']
-    list_filter = ['status', 'date']
-
-@admin.register(Routine)
-class RoutineAdmin(admin.ModelAdmin):
-    list_display = ['class_obj', 'day', 'subject', 'start_time', 'end_time']
-    list_filter = ['class_obj', 'day']
-
-@admin.register(Resource)
-class ResourceAdmin(admin.ModelAdmin):
-    list_display = ['title', 'file_type', 'uploaded_date']
-    list_filter = ['file_type']
+    fieldsets = (
+        ('Student Information', {
+            'fields': ('student_id', 'name', 'email', 'phone', 'guardian_phone')
+        }),
+        ('Academic Information', {
+            'fields': ('class_name', 'section', 'roll', 'school_name')
+        }),
+        ('Account Information', {
+            'fields': ('password',),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def save_model(self, request, obj, form, change):
+        if not change:  # New student
+            # Create user with student_id as username
+            user = User.objects.create_user(
+                username=obj.student_id,
+                password=form.cleaned_data.get('password', 'student123')
+            )
+            obj.user = user
+        else:  # Existing student
+            if form.cleaned_data.get('password'):
+                obj.user.set_password(form.cleaned_data['password'])
+                obj.user.save()
+            obj.user.username = obj.student_id
+            obj.user.save()
+        super().save_model(request, obj, form, change)
