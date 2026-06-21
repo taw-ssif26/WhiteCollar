@@ -48,7 +48,7 @@ class ResultAdmin(admin.ModelAdmin):
     list_filter = ['exam_name', 'grade']
     search_fields = ['student__name', 'student__student_id']
 
-# Invoice Admin - ✅ ADD THIS
+# ✅ Invoice Admin - REGISTERED
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
     list_display = ['student', 'month', 'year', 'amount', 'status', 'generated_date']
