@@ -4,51 +4,89 @@
 
 {% block content %}
 <div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-3xl mx-auto">
-    <div class="text-center mb-12">
-        <h2 class="font-display-lg text-4xl md:text-5xl text-secondary font-['EB_Garamond']">Request Invoice</h2>
-        <p class="text-on-surface-variant mt-4">Request a monthly invoice for your tuition fees</p>
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{% url 'student_dashboard' %}" class="text-secondary hover:underline">← Back to Dashboard</a>
+        <h1 class="font-display-lg text-3xl md:text-4xl text-secondary font-['EB_Garamond']">Request Invoice</h1>
     </div>
 
     <div class="glass-card p-8 md:p-12 rounded-3xl">
         <form method="POST" class="space-y-6">
             {% csrf_token %}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="font-label-caps text-xs text-secondary block mb-2">MONTH</label>
-                    <select name="month" required 
-                            class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none appearance-none">
-                        <option value="" class="bg-surface-container-high">Select Month</option>
-                        <option value="January" class="bg-surface-container-high">January</option>
-                        <option value="February" class="bg-surface-container-high">February</option>
-                        <option value="March" class="bg-surface-container-high">March</option>
-                        <option value="April" class="bg-surface-container-high">April</option>
-                        <option value="May" class="bg-surface-container-high">May</option>
-                        <option value="June" class="bg-surface-container-high">June</option>
-                        <option value="July" class="bg-surface-container-high">July</option>
-                        <option value="August" class="bg-surface-container-high">August</option>
-                        <option value="September" class="bg-surface-container-high">September</option>
-                        <option value="October" class="bg-surface-container-high">October</option>
-                        <option value="November" class="bg-surface-container-high">November</option>
-                        <option value="December" class="bg-surface-container-high">December</option>
-                    </select>
+            
+            <!-- Month -->
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">MONTH *</label>
+                <select name="month" required 
+                        class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none appearance-none">
+                    <option value="" class="bg-surface-container-high">Select Month</option>
+                    <option value="January" class="bg-surface-container-high">January</option>
+                    <option value="February" class="bg-surface-container-high">February</option>
+                    <option value="March" class="bg-surface-container-high">March</option>
+                    <option value="April" class="bg-surface-container-high">April</option>
+                    <option value="May" class="bg-surface-container-high">May</option>
+                    <option value="June" class="bg-surface-container-high">June</option>
+                    <option value="July" class="bg-surface-container-high">July</option>
+                    <option value="August" class="bg-surface-container-high">August</option>
+                    <option value="September" class="bg-surface-container-high">September</option>
+                    <option value="October" class="bg-surface-container-high">October</option>
+                    <option value="November" class="bg-surface-container-high">November</option>
+                    <option value="December" class="bg-surface-container-high">December</option>
+                </select>
+            </div>
+
+            <!-- Year -->
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">YEAR *</label>
+                <select name="year" required 
+                        class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none appearance-none">
+                    <option value="" class="bg-surface-container-high">Select Year</option>
+                    {% for year in "2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030"|split:"," %}
+                    <option value="{{ year }}" {% if year == "2026" %}selected{% endif %} class="bg-surface-container-high">{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Amount -->
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">AMOUNT (BDT) *</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-secondary font-bold">৳</span>
+                    <input type="number" name="amount" value="1500" min="1" step="0.01" required
+                           class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl pl-10 pr-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none"
+                           placeholder="Enter amount in BDT">
                 </div>
-                <div>
-                    <label class="font-label-caps text-xs text-secondary block mb-2">YEAR</label>
-                    <select name="year" required 
-                            class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none appearance-none">
-                        <option value="" class="bg-surface-container-high">Select Year</option>
-                        <option value="2024" class="bg-surface-container-high">2024</option>
-                        <option value="2025" class="bg-surface-container-high">2025</option>
-                        <option value="2026" class="bg-surface-container-high">2026</option>
-                    </select>
+                <p class="text-on-surface-variant text-xs mt-2">Default: ৳1500 for monthly tuition</p>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">DESCRIPTION</label>
+                <input type="text" name="description" value="Monthly Tuition Fee"
+                       class="w-full bg-surface-container-highest/30 border border-white/10 rounded-xl px-6 py-4 text-on-surface focus:ring-2 focus:ring-secondary focus:border-secondary transition-all outline-none"
+                       placeholder="e.g., Tuition Fee, Exam Fee, Library Fee">
+                <p class="text-on-surface-variant text-xs mt-2">Optional - Describe what this invoice is for</p>
+            </div>
+
+            <!-- Quick Amount Buttons -->
+            <div>
+                <label class="font-label-caps text-xs text-secondary block mb-2">QUICK AMOUNTS</label>
+                <div class="flex flex-wrap gap-3">
+                    <button type="button" onclick="setAmount(1000)" class="glass-card px-4 py-2 rounded-full text-sm hover:border-secondary transition-all">৳1,000</button>
+                    <button type="button" onclick="setAmount(1500)" class="glass-card px-4 py-2 rounded-full text-sm hover:border-secondary transition-all border-secondary/50">৳1,500</button>
+                    <button type="button" onclick="setAmount(2000)" class="glass-card px-4 py-2 rounded-full text-sm hover:border-secondary transition-all">৳2,000</button>
+                    <button type="button" onclick="setAmount(2500)" class="glass-card px-4 py-2 rounded-full text-sm hover:border-secondary transition-all">৳2,500</button>
+                    <button type="button" onclick="setAmount(3000)" class="glass-card px-4 py-2 rounded-full text-sm hover:border-secondary transition-all">৳3,000</button>
+                    <button type="button" onclick="setAmount(5000)" class="glass-card px-4 py-2 rounded-full text-sm hover:border-secondary transition-all">৳5,000</button>
                 </div>
             </div>
-            <div class="glass-card p-6 rounded-xl">
-                <div class="flex items-center justify-between">
-                    <span class="text-on-surface-variant">Monthly Fee</span>
-                    <span class="text-2xl text-secondary font-bold">$1,500.00</span>
-                </div>
+
+            <div class="bg-secondary/5 p-4 rounded-xl border border-white/5">
+                <p class="text-on-surface-variant text-sm">
+                    <span class="text-secondary">ℹ️</span> 
+                    Invoice will be sent to admin for approval. You'll receive a PDF once approved.
+                </p>
             </div>
+
             <button type="submit" 
                     class="w-full bg-secondary text-on-secondary py-4 rounded-xl font-label-caps text-sm font-bold tracking-[0.2em] hover:shadow-[0_0_30px_rgba(233,193,118,0.4)] transition-all">
                 REQUEST INVOICE
@@ -56,4 +94,15 @@
         </form>
     </div>
 </div>
+
+<script>
+function setAmount(value) {
+    document.querySelector('input[name="amount"]').value = value;
+    // Highlight the selected button
+    document.querySelectorAll('.quick-amount-btn').forEach(btn => {
+        btn.classList.remove('border-secondary/50');
+    });
+    event.target.classList.add('border-secondary/50');
+}
+</script>
 {% endblock %}
