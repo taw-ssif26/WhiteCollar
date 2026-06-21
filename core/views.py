@@ -3,9 +3,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 import json
+import os
 from .models import *
 from .forms import *
 
@@ -162,7 +163,7 @@ def student_dashboard(request):
     # Routine
     routine = Routine.objects.filter(class_obj__name=student.class_name)
     
-    # ✅ FIXED: Limit graph to last 10 exams
+    # Limit graph to last 10 exams
     graph_results = student.results.all().order_by('exam_date')[:10]
     exam_names = []
     exam_data = []
@@ -214,20 +215,139 @@ def invoice_request(request):
         student = request.user.student
         month = request.POST.get('month')
         year = request.POST.get('year')
+        
+        # Check if invoice already exists
+        existing = Invoice.objects.filter(
+            student=student,
+            month=month,
+            year=year
+        ).first()
+        
+        if existing:
+            messages.warning(request, 'Invoice already exists for this month')
+            return redirect('student_dashboard')
+        
         Invoice.objects.create(
             student=student,
             month=month,
             year=year,
             amount=1500.00
         )
-        messages.success(request, 'Invoice requested successfully!')
+        messages.success(request, 'Invoice requested successfully! Waiting for admin approval.')
         return redirect('student_dashboard')
+    
     return render(request, 'core/invoice_request.html')
 
 @login_required
 def resources_view(request):
     resources = Resource.objects.all()
     return render(request, 'core/resources.html', {'resources': resources})
+
+# ============================================
+# INVOICE VIEWS
+# ============================================
+
+@login_required
+def invoice_download(request, pk):
+    """Download invoice PDF"""
+    invoice = get_object_or_404(Invoice, pk=pk)
+    
+    # Security: Ensure student can only download their own invoices
+    if hasattr(request.user, 'student'):
+        if request.user.student != invoice.student and not request.user.is_superuser:
+            messages.error(request, 'You are not authorized to view this invoice')
+            return redirect('student_dashboard')
+    
+    if not invoice.pdf_file:
+        messages.error(request, 'PDF not generated yet. Please contact admin.')
+        return redirect('student_dashboard')
+    
+    from django.conf import settings
+    file_path = os.path.join(settings.MEDIA_ROOT, str(invoice.pdf_file))
+    
+    if not os.path.exists(file_path):
+        messages.error(request, 'PDF file not found. Please contact admin.')
+        return redirect('student_dashboard')
+    
+    with open(file_path, 'rb') as f:
+        response = HttpResponse(f.read(), content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename=invoice_{invoice.id}.pdf'
+        return response
+
+# ============================================
+# PROGRESS REPORT VIEWS
+# ============================================
+
+@login_required
+def download_progress_report(request):
+    """Download student progress report"""
+    if not hasattr(request.user, 'student'):
+        messages.error(request, 'Student profile not found')
+        return redirect('front_page')
+    
+    student = request.user.student
+    
+    try:
+        from .utils.progress_reports import generate_progress_report
+        filepath = generate_progress_report(student)
+        
+        with open(filepath, 'rb') as f:
+            response = HttpResponse(f.read(), content_type='application/pdf')
+            response['Content-Disposition'] = f'inline; filename=progress_{student.student_id}.pdf'
+            return response
+    except Exception as e:
+        messages.error(request, f'Error generating report: {str(e)}')
+        return redirect('student_dashboard')
+
+# ============================================
+# ATTENDANCE VIEWS
+# ============================================
+
+@login_required
+def attendance_view(request):
+    """Student view their attendance"""
+    if not hasattr(request.user, 'student'):
+        return redirect('front_page')
+    
+    student = request.user.student
+    attendances = student.attendances.all().order_by('-date')
+    
+    # Get monthly summary
+    current_month = timezone.now().month
+    current_year = timezone.now().year
+    
+    total_days = attendances.count()
+    present_days = attendances.filter(status='present').count()
+    absent_days = attendances.filter(status='absent').count()
+    
+    summary = {
+        'total': total_days,
+        'present': present_days,
+        'absent': absent_days,
+        'percentage': (present_days / total_days * 100) if total_days > 0 else 0
+    }
+    
+    context = {
+        'attendances': attendances,
+        'summary': summary,
+        'student': student,
+    }
+    return render(request, 'core/attendance_view.html', context)
+
+@user_passes_test(is_admin)
+def attendance_history(request, student_id=None):
+    """Admin view attendance history"""
+    if student_id:
+        student = get_object_or_404(Student, id=student_id)
+        attendances = student.attendances.all().order_by('-date')
+    else:
+        attendances = Attendance.objects.all().order_by('-date')
+        student = None
+    
+    return render(request, 'core/attendance_history.html', {
+        'attendances': attendances,
+        'student': student,
+    })
 
 # ============================================
 # ADMIN VIEWS
@@ -436,7 +556,17 @@ def invoice_approve(request, pk):
     invoice.status = 'approved'
     invoice.approved_date = timezone.now()
     invoice.save()
-    messages.success(request, f'Invoice approved for {invoice.student.name}')
+    
+    # Generate PDF
+    try:
+        from .utils.invoice_generator import generate_invoice_pdf
+        pdf_path = generate_invoice_pdf(invoice)
+        invoice.pdf_file = pdf_path
+        invoice.save()
+        messages.success(request, f'Invoice approved and PDF generated for {invoice.student.name}')
+    except Exception as e:
+        messages.error(request, f'Invoice approved but PDF generation failed: {str(e)}')
+    
     return redirect('invoice_manage')
 
 @user_passes_test(is_admin)
@@ -471,10 +601,47 @@ def routine_add(request):
 @user_passes_test(is_admin)
 def attendance_manage(request):
     if request.method == 'POST':
-        messages.success(request, 'Attendance marked successfully!')
+        date = request.POST.get('date')
+        class_name = request.POST.get('class_name')
+        
+        if not date or not class_name:
+            messages.error(request, 'Please select date and class')
+            return redirect('attendance_manage')
+        
+        students = Student.objects.filter(class_name=class_name)
+        marked = 0
+        absent_list = []
+        
+        for student in students:
+            status = request.POST.get(f'attendance_{student.id}')
+            if status:
+                Attendance.objects.update_or_create(
+                    student=student,
+                    date=date,
+                    defaults={'status': status}
+                )
+                marked += 1
+                if status == 'absent':
+                    absent_list.append(student.name)
+        
+        # Send SMS to absent students
+        if request.POST.get('send_sms') == 'on' and absent_list:
+            try:
+                from .utils.sms import send_sms
+                for student in Student.objects.filter(name__in=absent_list):
+                    message = f"Dear {student.name}, you were absent on {date}. Please contact the admin."
+                    send_sms(student.phone, message)
+            except Exception:
+                pass  # SMS is optional
+        
+        messages.success(request, f'✅ Attendance marked for {marked} students!')
+        if absent_list:
+            messages.info(request, f'📋 Absent: {", ".join(absent_list)}')
+        
         return redirect('attendance_manage')
+    
     classes = Class.objects.all()
-    return render(request, 'core/attendance.html', {'classes': classes})
+    return render(request, 'core/attendance_manage.html', {'classes': classes})
 
 # ============================================
 # RESOURCE MANAGEMENT (Admin)
@@ -492,25 +659,14 @@ def resource_add(request):
         form = ResourceForm()
     return render(request, 'core/resource_form.html', {'form': form, 'title': 'Add Resource'})
 
+# ============================================
+# API VIEWS (For AJAX requests)
+# ============================================
 
-
-
-# core/views.py - Add this function
-
-@login_required
-def download_progress_report(request):
-    if not hasattr(request.user, 'student'):
-        return redirect('front_page')
-    
-    student = request.user.student
-    from .utils.progress_reports import generate_progress_report
-    
-    try:
-        filepath = generate_progress_report(student)
-        with open(filepath, 'rb') as f:
-            response = HttpResponse(f.read(), content_type='application/pdf')
-            response['Content-Disposition'] = f'inline; filename=progress_{student.student_id}.pdf'
-            return response
-    except Exception as e:
-        messages.error(request, f'Error generating report: {str(e)}')
-        return redirect('student_dashboard')
+def api_students(request):
+    """API endpoint for getting students by class"""
+    class_name = request.GET.get('class')
+    if class_name:
+        students = Student.objects.filter(class_name=class_name).values('id', 'student_id', 'name', 'roll')
+        return JsonResponse(list(students), safe=False)
+    return JsonResponse([], safe=False)
