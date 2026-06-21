@@ -54,13 +54,17 @@ urlpatterns = [
     path('admin/invoices/', views.invoice_manage, name='invoice_manage'),
     path('admin/invoices/approve/<int:pk>/', views.invoice_approve, name='invoice_approve'),
     path('admin/invoices/paid/<int:pk>/', views.invoice_mark_paid, name='invoice_mark_paid'),
-    
+    path('invoice/download/<int:pk>/', views.invoice_download, name='invoice_download'),
     # Routine management
     path('admin/routines/add/', views.routine_add, name='routine_add'),
     
     # Attendance management
     path('admin/attendance/', views.attendance_manage, name='attendance_manage'),
+    path('attendance/', views.attendance_view, name='attendance_view'),
+    path('admin/attendance/history/<int:student_id>/', views.attendance_history, name='attendance_history'),
     
     # Resource management
     path('admin/resources/add/', views.resource_add, name='resource_add'),
+     # Progress Report
+    path('report/download/', views.download_progress_report, name='download_progress_report'),
 ]
