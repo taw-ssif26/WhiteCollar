@@ -79,6 +79,8 @@ class Attendance(models.Model):
     class Meta:
         unique_together = ['student', 'date']
 
+# core/models.py - Update the Invoice model
+
 class Invoice(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -90,7 +92,8 @@ class Invoice(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='invoices')
     month = models.CharField(max_length=20)
     year = models.IntegerField()
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=1500.00)
+    description = models.TextField(blank=True, help_text="Fee description (e.g., Tuition, Exam Fee, etc.)")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     generated_date = models.DateTimeField(auto_now_add=True)
     approved_date = models.DateTimeField(null=True, blank=True)
@@ -98,7 +101,7 @@ class Invoice(models.Model):
     pdf_file = models.FileField(upload_to='invoices/', null=True, blank=True)
     
     def __str__(self):
-        return f"{self.student.name} - {self.month} {self.year}"
+        return f"{self.student.name} - {self.month} {self.year} - BDT {self.amount}"
     
     class Meta:
         ordering = ['-year', '-month']
