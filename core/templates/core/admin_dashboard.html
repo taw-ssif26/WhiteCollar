@@ -14,21 +14,28 @@
 
     <!-- Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Students -->
         <div class="glass-card p-6 rounded-xl text-center">
             <div class="text-3xl text-secondary font-bold">{{ total_students }}</div>
             <div class="text-on-surface-variant text-sm mt-2">Total Students</div>
-            <a href="/admin/core/student/" class="text-secondary text-xs hover:underline block mt-2">Manage →</a>
+            <a href="{% url 'admin:core_student_changelist' %}" class="text-secondary text-xs hover:underline block mt-2">Manage →</a>
         </div>
+        
+        <!-- Pending Invoices -->
         <div class="glass-card p-6 rounded-xl text-center">
             <div class="text-3xl text-secondary font-bold">{{ pending_invoices }}</div>
             <div class="text-on-surface-variant text-sm mt-2">Pending Invoices</div>
-            <a href="/admin/core/invoice/" class="text-secondary text-xs hover:underline block mt-2">Review →</a>
+            <a href="{% url 'admin:core_invoice_changelist' %}" class="text-secondary text-xs hover:underline block mt-2">Review →</a>
         </div>
+        
+        <!-- Total Events -->
         <div class="glass-card p-6 rounded-xl text-center">
             <div class="text-3xl text-secondary font-bold">{{ total_events }}</div>
             <div class="text-on-surface-variant text-sm mt-2">Total Events</div>
             <a href="{% url 'events_view' %}" class="text-secondary text-xs hover:underline block mt-2">View →</a>
         </div>
+        
+        <!-- Absent Today -->
         <div class="glass-card p-6 rounded-xl text-center">
             <div class="text-3xl text-secondary font-bold">{{ absent_today }}</div>
             <div class="text-on-surface-variant text-sm mt-2">Absent Today</div>
@@ -41,17 +48,17 @@
         <h3 class="font-headline-md text-2xl text-secondary mb-6 font-['EB_Garamond']">Quick Actions</h3>
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             <!-- Student Management -->
-            <a href="/admin/core/student/add/" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
+            <a href="{% url 'admin:core_student_add' %}" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
                 <span class="material-symbols-outlined text-2xl text-secondary block">person_add</span>
                 <span class="text-on-surface-variant text-xs">Add Student</span>
             </a>
-            <a href="/admin/core/student/" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
+            <a href="{% url 'admin:core_student_changelist' %}" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
                 <span class="material-symbols-outlined text-2xl text-secondary block">list</span>
                 <span class="text-on-surface-variant text-xs">Student List</span>
             </a>
             
             <!-- Event Management -->
-            <a href="/admin/core/event/add/" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
+            <a href="{% url 'admin:core_event_add' %}" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
                 <span class="material-symbols-outlined text-2xl text-secondary block">add_event</span>
                 <span class="text-on-surface-variant text-xs">Add Event</span>
             </a>
@@ -61,7 +68,7 @@
             </a>
             
             <!-- Result Management -->
-            <a href="/admin/core/result/add/" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
+            <a href="{% url 'admin:core_result_add' %}" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
                 <span class="material-symbols-outlined text-2xl text-secondary block">grade</span>
                 <span class="text-on-surface-variant text-xs">Add Result</span>
             </a>
@@ -71,7 +78,7 @@
             </a>
             
             <!-- Achievement Management -->
-            <a href="/admin/core/achievement/add/" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
+            <a href="{% url 'admin:core_achievement_add' %}" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
                 <span class="material-symbols-outlined text-2xl text-secondary block">emoji_events</span>
                 <span class="text-on-surface-variant text-xs">Add Achievement</span>
             </a>
@@ -81,7 +88,7 @@
             </a>
             
             <!-- Gallery Management -->
-            <a href="/admin/core/gallery/add/" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
+            <a href="{% url 'admin:core_gallery_add' %}" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
                 <span class="material-symbols-outlined text-2xl text-secondary block">image</span>
                 <span class="text-on-surface-variant text-xs">Add Image</span>
             </a>
@@ -91,7 +98,7 @@
             </a>
             
             <!-- Routine Management -->
-            <a href="/admin/core/routine/add/" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
+            <a href="{% url 'admin:core_routine_add' %}" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
                 <span class="material-symbols-outlined text-2xl text-secondary block">schedule</span>
                 <span class="text-on-surface-variant text-xs">Add Routine</span>
             </a>
@@ -101,7 +108,7 @@
             </a>
             
             <!-- Invoice Management -->
-            <a href="/admin/core/invoice/" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
+            <a href="{% url 'admin:core_invoice_changelist' %}" class="glass-card p-4 rounded-xl text-center hover:border-secondary transition-all">
                 <span class="material-symbols-outlined text-2xl text-secondary block">receipt_long</span>
                 <span class="text-on-surface-variant text-xs">Manage Invoices</span>
             </a>
@@ -137,7 +144,7 @@
         <div class="glass-card p-8 rounded-2xl">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-headline-md text-2xl text-secondary font-['EB_Garamond']">Recent Students</h3>
-                <a href="/admin/core/student/" class="text-secondary text-sm hover:underline">View All →</a>
+                <a href="{% url 'admin:core_student_changelist' %}" class="text-secondary text-sm hover:underline">View All →</a>
             </div>
             <div class="space-y-3">
                 {% for student in recent_students|slice:":5" %}
@@ -146,10 +153,10 @@
                         <div class="text-on-surface">{{ student.name }}</div>
                         <div class="text-on-surface-variant text-xs">{{ student.student_id }} | {{ student.class_name }}</div>
                     </div>
-                    <a href="/admin/core/student/{{ student.id }}/change/" class="text-secondary text-xs hover:underline">Edit</a>
+                    <a href="{% url 'admin:core_student_change' student.id %}" class="text-secondary text-xs hover:underline">Edit</a>
                 </div>
                 {% empty %}
-                <p class="text-on-surface-variant">No students added yet. <a href="/admin/core/student/add/" class="text-secondary hover:underline">Add your first student →</a></p>
+                <p class="text-on-surface-variant">No students added yet. <a href="{% url 'admin:core_student_add' %}" class="text-secondary hover:underline">Add your first student →</a></p>
                 {% endfor %}
             </div>
         </div>
@@ -167,10 +174,10 @@
                         <div class="text-on-surface">{{ event.title }}</div>
                         <div class="text-on-surface-variant text-xs">{{ event.date|date:"M d, Y" }} | {{ event.event_type|title }}</div>
                     </div>
-                    <a href="/admin/core/event/{{ event.id }}/change/" class="text-secondary text-xs hover:underline">Edit</a>
+                    <a href="{% url 'admin:core_event_change' event.id %}" class="text-secondary text-xs hover:underline">Edit</a>
                 </div>
                 {% empty %}
-                <p class="text-on-surface-variant">No events yet. <a href="/admin/core/event/add/" class="text-secondary hover:underline">Create your first event →</a></p>
+                <p class="text-on-surface-variant">No events yet. <a href="{% url 'admin:core_event_add' %}" class="text-secondary hover:underline">Create your first event →</a></p>
                 {% endfor %}
             </div>
         </div>
@@ -180,7 +187,7 @@
     <div class="glass-card p-8 rounded-2xl mt-8">
         <div class="flex justify-between items-center mb-4">
             <h3 class="font-headline-md text-2xl text-secondary font-['EB_Garamond']">Pending Invoices</h3>
-            <a href="/admin/core/invoice/" class="text-secondary text-sm hover:underline">View All →</a>
+            <a href="{% url 'admin:core_invoice_changelist' %}" class="text-secondary text-sm hover:underline">View All →</a>
         </div>
         <div class="space-y-3">
             {% for invoice in recent_invoices|slice:":5" %}
@@ -191,7 +198,7 @@
                 </div>
                 <div class="flex gap-3">
                     <span class="px-2 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-400">Pending</span>
-                    <a href="/admin/core/invoice/{{ invoice.id }}/change/" class="text-secondary text-xs hover:underline">Review</a>
+                    <a href="{% url 'admin:core_invoice_change' invoice.id %}" class="text-secondary text-xs hover:underline">Review</a>
                 </div>
             </div>
             {% empty %}
