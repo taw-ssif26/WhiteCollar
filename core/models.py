@@ -78,6 +78,24 @@ class Attendance(models.Model):
     
     class Meta:
         unique_together = ['student', 'date']
+    
+    @classmethod
+    def get_daily_summary(cls, date, class_name=None):
+        """Get attendance summary for a specific date and class"""
+        query = cls.objects.filter(date=date)
+        if class_name:
+            query = query.filter(student__class_name=class_name)
+        
+        total = query.count()
+        present = query.filter(status='present').count()
+        absent = query.filter(status='absent').count()
+        
+        return {
+            'total': total,
+            'present': present,
+            'absent': absent,
+            'percentage': (present / total * 100) if total > 0 else 0
+        }
 
 # core/models.py - Update the Invoice model
 
