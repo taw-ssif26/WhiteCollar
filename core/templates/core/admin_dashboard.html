@@ -11,37 +11,36 @@
             <a href="{% url 'logout' %}" class="glass-card px-6 py-2 rounded-full text-sm hover:border-red-500/50 transition-all">Logout</a>
         </div>
     </div>
-
     <!-- Stats -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Total Students -->
-        <div class="glass-card p-6 rounded-xl text-center">
-            <div class="text-3xl text-secondary font-bold">{{ total_students }}</div>
-            <div class="text-on-surface-variant text-sm mt-2">Total Students</div>
-            <a href="{% url 'admin:core_student_changelist' %}" class="text-secondary text-xs hover:underline block mt-2">Manage →</a>
-        </div>
-        
-        <!-- Pending Invoices -->
-        <div class="glass-card p-6 rounded-xl text-center">
-            <div class="text-3xl text-secondary font-bold">{{ pending_invoices }}</div>
-            <div class="text-on-surface-variant text-sm mt-2">Pending Invoices</div>
-            <a href="{% url 'admin:core_invoice_changelist' %}" class="text-secondary text-xs hover:underline block mt-2">Review →</a>
-        </div>
-        
-        <!-- Total Events -->
-        <div class="glass-card p-6 rounded-xl text-center">
-            <div class="text-3xl text-secondary font-bold">{{ total_events }}</div>
-            <div class="text-on-surface-variant text-sm mt-2">Total Events</div>
-            <a href="{% url 'events_view' %}" class="text-secondary text-xs hover:underline block mt-2">View →</a>
-        </div>
-        
-        <!-- Absent Today -->
-        <div class="glass-card p-6 rounded-xl text-center">
-            <div class="text-3xl text-secondary font-bold">{{ absent_today }}</div>
-            <div class="text-on-surface-variant text-sm mt-2">Absent Today</div>
-            <a href="{% url 'attendance_manage' %}" class="text-secondary text-xs hover:underline block mt-2">Mark →</a>
-        </div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Total Students -->
+    <div class="glass-card p-6 rounded-xl text-center">
+        <div class="text-3xl text-secondary font-bold">{{ total_students }}</div>
+        <div class="text-on-surface-variant text-sm mt-2">Total Students</div>
+        <a href="{% url 'admin:core_student_changelist' %}" class="text-secondary text-xs hover:underline block mt-2">Manage →</a>
     </div>
+    
+    <!-- Pending Invoices -->
+    <div class="glass-card p-6 rounded-xl text-center">
+        <div class="text-3xl text-secondary font-bold">{{ pending_invoices }}</div>
+        <div class="text-on-surface-variant text-sm mt-2">Pending Invoices</div>
+        <a href="{% url 'admin:core_invoice_changelist' %}" class="text-secondary text-xs hover:underline block mt-2">Review →</a>
+    </div>
+    
+    <!-- Total Events -->
+    <div class="glass-card p-6 rounded-xl text-center">
+        <div class="text-3xl text-secondary font-bold">{{ total_events }}</div>
+        <div class="text-on-surface-variant text-sm mt-2">Total Events</div>
+        <a href="{% url 'events_view' %}" class="text-secondary text-xs hover:underline block mt-2">View →</a>
+    </div>
+    
+    <!-- Absent Today -->
+    <div class="glass-card p-6 rounded-xl text-center">
+        <div class="text-3xl text-secondary font-bold">{{ absent_today }}</div>
+        <div class="text-on-surface-variant text-sm mt-2">Absent Today</div>
+        <a href="{% url 'attendance_manage' %}" class="text-secondary text-xs hover:underline block mt-2">Mark →</a>
+    </div>
+</div>
 
     <!-- Quick Actions -->
     <div class="glass-card p-8 rounded-2xl mb-8">
