@@ -29,7 +29,7 @@ def front_page(request):
         'results': results,
     })
 
-def login_view(request):
+def login_view(request):_manage
     if request.user.is_authenticated:
         if request.user.is_superuser or request.user.is_staff:
             return redirect('admin_dashboard')
@@ -656,7 +656,7 @@ def attendance_manage(request):
         return redirect('attendance_manage')
     
     classes = Class.objects.all()
-    return render(request, 'core/attendance_manage.html', {'classes': classes})
+    return render(request, 'core/attendance.html', {'classes': classes})
 
 # ============================================
 # RESOURCE MANAGEMENT (Admin)
