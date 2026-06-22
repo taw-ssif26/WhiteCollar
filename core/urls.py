@@ -68,7 +68,7 @@ urlpatterns = [
     path('admin/routines/add/', views.routine_add, name='routine_add'),
     
     # Attendance management (Admin)
-    path('admin/attendance/', views.attendance, name='attendance_manage'),
+    path('admin/attendance/', views.attendance_manage, name='attendance_manage'),
     path('admin/attendance/history/', views.attendance_history, name='attendance_history'),
     path('admin/attendance/history/<int:student_id>/', views.attendance_history, name='attendance_history_student'),
     
