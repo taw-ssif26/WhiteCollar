@@ -32,47 +32,47 @@ urlpatterns = [
     # Attendance (Student view)
     path('attendance/', views.attendance_view, name='attendance_view'),
     
-    # Admin Dashboard
+    # Admin pages
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     
-    # Student management (Django admin)
+    # Student management
     path('admin/students/', views.student_list, name='student_list'),
     path('admin/students/add/', views.student_add, name='student_add'),
     path('admin/students/edit/<int:pk>/', views.student_edit, name='student_edit'),
     path('admin/students/delete/<int:pk>/', views.student_delete, name='student_delete'),
     
-    # Event management (Django admin)
+    # Event management
     path('admin/events/add/', views.event_add, name='event_add'),
     path('admin/events/edit/<int:pk>/', views.event_edit, name='event_edit'),
     path('admin/events/delete/<int:pk>/', views.event_delete, name='event_delete'),
     
-    # Gallery management (Django admin)
+    # Gallery management
     path('admin/gallery/add/', views.gallery_add, name='gallery_add'),
     path('admin/gallery/delete/<int:pk>/', views.gallery_delete, name='gallery_delete'),
     
-    # Result management (Django admin)
+    # Result management
     path('admin/results/add/', views.result_add, name='result_add'),
     path('admin/results/upload/', views.result_upload_excel, name='result_upload_excel'),
     
-    # Achievement management (Django admin)
+    # Achievement management
     path('admin/achievements/add/', views.achievement_add, name='achievement_add'),
     path('admin/achievements/edit/<int:pk>/', views.achievement_edit, name='achievement_edit'),
     path('admin/achievements/delete/<int:pk>/', views.achievement_delete, name='achievement_delete'),
     
-    # Invoice management (Custom admin)
-    path('manage/invoices/', views.invoice_manage, name='invoice_manage'),
-    path('manage/invoices/approve/<int:pk>/', views.invoice_approve, name='invoice_approve'),
-    path('manage/invoices/paid/<int:pk>/', views.invoice_mark_paid, name='invoice_mark_paid'),
+    # Invoice management
+    path('admin/invoices/', views.invoice_manage, name='invoice_manage'),
+    path('admin/invoices/approve/<int:pk>/', views.invoice_approve, name='invoice_approve'),
+    path('admin/invoices/paid/<int:pk>/', views.invoice_mark_paid, name='invoice_mark_paid'),
     
-    # Routine management (Django admin)
+    # Routine management
     path('admin/routines/add/', views.routine_add, name='routine_add'),
     
-    # ✅ Attendance management (Custom admin) - Using /manage/ to avoid conflicts
+    # ✅ Attendance management (Admin)
     path('manage/attendance/', views.attendance_manage, name='attendance_manage'),
     path('manage/attendance/history/', views.attendance_history, name='attendance_history'),
     path('manage/attendance/history/<int:student_id>/', views.attendance_history, name='attendance_history_student'),
     
-    # Resource management (Custom admin)
+    # ✅ Resource management
     path('manage/resources/add/', views.resource_add, name='resource_add'),
     
     # API
