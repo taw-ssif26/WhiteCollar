@@ -438,6 +438,8 @@ Please contact the admin if you have any questions.
 # ADMIN VIEWS
 # ============================================
 
+# core/views.py - admin_dashboard function
+
 @user_passes_test(is_admin)
 def admin_dashboard(request):
     context = {
@@ -450,7 +452,6 @@ def admin_dashboard(request):
         'recent_invoices': Invoice.objects.filter(status='pending').order_by('-generated_date')[:10],
     }
     return render(request, 'core/admin_dashboard.html', context)
-
 # ============================================
 # STUDENT MANAGEMENT (Admin)
 # ============================================
