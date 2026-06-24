@@ -32,7 +32,7 @@ urlpatterns = [
     # Attendance (Student view)
     path('attendance/', views.attendance_view, name='attendance_view'),
     
-    # Admin pages
+    # Admin Dashboard
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     
     # Student management
@@ -67,13 +67,13 @@ urlpatterns = [
     # Routine management
     path('admin/routines/add/', views.routine_add, name='routine_add'),
     
-    # ✅ Attendance management (Admin)
-    path('manage/attendance/', views.attendance_manage, name='attendance_manage'),
-    path('manage/attendance/history/', views.attendance_history, name='attendance_history'),
-    path('manage/attendance/history/<int:student_id>/', views.attendance_history, name='attendance_history_student'),
+    # ✅ Attendance management (Admin) - FIXED URLs
+    path('attendance/manage/', views.attendance_manage, name='attendance_manage'),
+    path('attendance/history/', views.attendance_history, name='attendance_history'),
+    path('attendance/history/<int:student_id>/', views.attendance_history, name='attendance_history_student'),
     
-    # ✅ Resource management
-    path('manage/resources/add/', views.resource_add, name='resource_add'),
+    # Resource management
+    path('admin/resources/add/', views.resource_add, name='resource_add'),
     
     # API
     path('api/students/', views.api_students, name='api_students'),
