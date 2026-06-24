@@ -1,4 +1,4 @@
-/* static/css/custom.css */
+/* elite_english/static/css/custom.css */
 /* Additional custom styles beyond Tailwind */
 
 /* Glass effect enhancements */
@@ -58,4 +58,33 @@ input:focus, textarea:focus, select:focus {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+/* Particles container - Ensure content stays above */
+.particles-container {
+    pointer-events: none;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.particles-container canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Ensure content stays above particles */
+.relative-z-10 {
+    position: relative;
+    z-index: 10;
+}
+
+/* Fix for absolute positioned particles in relative containers */
+.relative {
+    position: relative;
 }
