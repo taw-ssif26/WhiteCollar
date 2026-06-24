@@ -67,13 +67,14 @@ urlpatterns = [
     # Routine management
     path('admin/routines/add/', views.routine_add, name='routine_add'),
     
-    # ✅ Attendance management (Admin) - FIXED URLs
-    path('attendance/manage/', views.attendance_manage, name='attendance_manage'),
-    path('attendance/history/', views.attendance_history, name='attendance_history'),
-    path('attendance/history/<int:student_id>/', views.attendance_history, name='attendance_history_student'),
+    # ✅ Attendance management (Admin)
+    path('manage/attendance/', views.attendance_manage, name='attendance_manage'),
+    path('manage/attendance/history/', views.attendance_history, name='attendance_history'),
+    path('manage/attendance/history/<int:student_id>/', views.attendance_history, name='attendance_history_student'),
     
-    # Resource management
-    path('admin/resources/add/', views.resource_add, name='resource_add'),
+    # ✅ Resource management - ADD THESE
+    path('manage/resources/add/', views.resource_add, name='resource_add'),
+    path('resources/', views.resources_view, name='resources_view'),
     
     # API
     path('api/students/', views.api_students, name='api_students'),
