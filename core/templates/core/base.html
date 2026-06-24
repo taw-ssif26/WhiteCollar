@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> WHITE-COLLAR English Coaching | {% block title %}Premium Education{% endblock %}</title>
+    <link rel="icon" type="image/jpg" href="{% static 'images/IMG-20260624-WA0000.jpg' %}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
@@ -72,6 +73,10 @@
 <body class="text-on-surface font-body-md overflow-x-hidden">
     <!-- Navigation -->
     <nav class="fixed top-0 w-full z-50 flex justify-between items-center px-4 md:px-12 lg:px-16 h-20 bg-surface-container-low/80 backdrop-blur-xl border-b border-secondary/20 shadow-[0px_4px_24px_0px_rgba(197,160,89,0.1)]">
+        <a href="{% url 'front_page' %}" class="flex items-center gap-3 font-headline-md text-2xl md:text-3xl text-secondary border-b-2 border-secondary/20 tracking-tight font-['EB_Garamond']">
+        <!-- Logo -->
+        <img src="{% static 'images/IMG-20260624-WA0000.jpg' %}" alt="White Collar Logo" 
+             class="h-8 w-auto md:h-10">
         <a href="{% url 'front_page' %}" class="font-headline-md text-2xl md:text-3xl text-secondary border-b-2 border-secondary/20 tracking-tight font-['EB_Garamond']">
             WHITE-COLLAR
         </a>
