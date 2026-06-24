@@ -350,28 +350,30 @@ def attendance_history(request, student_id=None):
 # ATTENDANCE MANAGEMENT (Admin)
 # ============================================
 
+# core/views.py - Complete attendance_manage function
+
 @user_passes_test(is_admin)
 def attendance_manage(request):
     if request.method == 'POST':
         date = request.POST.get('date')
         class_name = request.POST.get('class_name')
-
+        
         if not date or not class_name:
             messages.error(request, 'Please select date and class')
             return redirect('attendance_manage')
-
+        
         students = Student.objects.filter(class_name=class_name)
-
+        
         if not students.exists():
             messages.warning(request, 'No students found in this class')
             return redirect('attendance_manage')
-
+        
         absent_students = []
         present_students = []
-
+        
         for student in students:
             is_absent = request.POST.get(f'absent_{student.id}') == str(student.id)
-
+            
             if is_absent:
                 absent_students.append(student)
                 Attendance.objects.update_or_create(
@@ -386,7 +388,7 @@ def attendance_manage(request):
                     date=date,
                     defaults={'status': 'present', 'remarks': ''}
                 )
-
+        
         sms_sent_count = 0
         sms_errors = []
         if request.POST.get('send_sms') == 'on' and absent_students:
@@ -412,25 +414,25 @@ Please contact the admin if you have any questions.
             except Exception as e:
                 print(f"SMS Error: {e}")
                 messages.warning(request, 'SMS service is not configured properly.')
-
+        
         messages.success(request, f'✅ Attendance marked for {len(students)} students!')
         messages.info(request, f'📋 Present: {len(present_students)} | Absent: {len(absent_students)}')
-
+        
         if sms_sent_count > 0:
             messages.success(request, f'📱 SMS sent to {sms_sent_count} absent students')
         if sms_errors:
             messages.warning(request, f'⚠️ SMS failed for: {", ".join(sms_errors)}')
-
+        
         return redirect('attendance_manage')
-
+    
     classes = Class.objects.all()
     today = timezone.now().date()
-
+    
     context = {
         'classes': classes,
         'today': today,
     }
-    return render(request, 'core/attendance_manage.html', context)
+    return render(request, 'core/attendance.html', context)
 
 # ============================================
 # ADMIN VIEWS
