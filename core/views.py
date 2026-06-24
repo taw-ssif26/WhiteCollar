@@ -1,4 +1,5 @@
 # core/views.py
+# core/views.py - At the very top
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -9,7 +10,7 @@ from datetime import datetime
 import json
 import os
 from .models import *
-from .forms import *
+from .forms import *  # ← Make sure this line exists
 
 def is_admin(user):
     return user.is_superuser or user.is_staff
