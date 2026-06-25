@@ -1,4 +1,4 @@
-/* elite_english/static/css/custom.css */
+/* static/css/custom.css */
 /* Additional custom styles beyond Tailwind */
 
 /* Glass effect enhancements */
@@ -60,7 +60,7 @@ input:focus, textarea:focus, select:focus {
     background-clip: text;
 }
 
-/* Particles container - Ensure content stays above */
+/* Particles container */
 .particles-container {
     pointer-events: none;
     overflow: hidden;
@@ -84,7 +84,11 @@ input:focus, textarea:focus, select:focus {
     z-index: 10;
 }
 
-/* Fix for absolute positioned particles in relative containers */
-.relative {
-    position: relative;
+/* Navbar logo hover */
+.nav-logo {
+    transition: transform 0.3s ease;
+}
+
+.nav-logo:hover {
+    transform: scale(1.05);
 }
