@@ -28,7 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'whitenoise.runserver_nostatic',  # ✅ ADDED for development
+    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
@@ -39,7 +39,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ MUST BE HERE
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -105,11 +105,19 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# ✅ FIX: Create static directory if it doesn't exist
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+if not os.path.exists(STATIC_DIR):
+    os.makedirs(STATIC_DIR)
+    os.makedirs(os.path.join(STATIC_DIR, 'css'), exist_ok=True)
+    os.makedirs(os.path.join(STATIC_DIR, 'js'), exist_ok=True)
+    os.makedirs(os.path.join(STATIC_DIR, 'images'), exist_ok=True)
+
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    STATIC_DIR,
 ]
 
-# ✅ CRITICAL: Whitenoise storage for production
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
