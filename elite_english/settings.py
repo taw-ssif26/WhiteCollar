@@ -1,4 +1,5 @@
 # elite_english/settings.py
+
 import os
 import socket
 from pathlib import Path
@@ -100,22 +101,15 @@ USE_I18N = True
 USE_TZ = True
 
 # ============================================
-# STATIC & MEDIA FILES - COMPLETE CONFIG
+# STATIC & MEDIA FILES - CORRECT PATHS
 # ============================================
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# ✅ FIX: Create static directory if it doesn't exist
-STATIC_DIR = os.path.join(BASE_DIR, 'static')
-if not os.path.exists(STATIC_DIR):
-    os.makedirs(STATIC_DIR)
-    os.makedirs(os.path.join(STATIC_DIR, 'css'), exist_ok=True)
-    os.makedirs(os.path.join(STATIC_DIR, 'js'), exist_ok=True)
-    os.makedirs(os.path.join(STATIC_DIR, 'images'), exist_ok=True)
-
+# ✅ CORRECT: Static files are inside elite_english/static/
 STATICFILES_DIRS = [
-    STATIC_DIR,
+    os.path.join(BASE_DIR, 'elite_english', 'static'),  # ← This is the key fix!
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
