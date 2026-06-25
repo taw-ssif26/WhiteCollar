@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',  # ✅ ADDED for development
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
@@ -38,7 +39,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ MUST BE HERE
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -50,7 +51,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'elite_english.urls'
 
-# ✅ FIXED TEMPLATES - Correct path (no extra 's')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -99,10 +99,18 @@ TIME_ZONE = 'Asia/Dhaka'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+# ============================================
+# STATIC & MEDIA FILES - COMPLETE CONFIG
+# ============================================
+
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+# ✅ CRITICAL: Whitenoise storage for production
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
@@ -110,7 +118,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Create media directories
 os.makedirs(MEDIA_ROOT, exist_ok=True)
-for subdir in ['gallery', 'events', 'achievements', 'resources', 'teachers', 'invoices']:
+for subdir in ['gallery', 'events', 'achievements', 'resources', 'teachers', 'invoices', 'reports']:
     os.makedirs(os.path.join(MEDIA_ROOT, subdir), exist_ok=True)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -136,3 +144,7 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+
+# MIM SMS
+MIM_SMS_API_KEY = os.getenv('MIM_SMS_API_KEY', '')
+MIM_SMS_SENDER_ID = os.getenv('MIM_SMS_SENDER_ID', '')
