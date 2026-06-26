@@ -1,6 +1,7 @@
 # core/admin.py
 from django.contrib import admin
 from django.utils import timezone
+from django.contrib.auth.models import User
 from .models import *
 
 # Student Admin
@@ -21,6 +22,17 @@ class StudentAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+    
+    def save_model(self, request, obj, form, change):
+        if not change:  # Creating a new student
+            # Create a User for the student
+            user = User.objects.create_user(
+                username=obj.student_id,
+                password='student123',  # Default password
+                email=obj.email
+            )
+            obj.user = user
+        super().save_model(request, obj, form, change)
 
 # Event Admin
 @admin.register(Event)
@@ -60,7 +72,7 @@ class InvoiceAdmin(admin.ModelAdmin):
             'fields': ('student',)
         }),
         ('Invoice Details', {
-            'fields': ('month', 'year', 'amount', 'description')
+            'fields': ('month', 'year', 'amount')
         }),
         ('Status', {
             'fields': ('status',)
@@ -113,7 +125,7 @@ class ContactAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
     search_fields = ['name', 'email']
 
-# Class Admin - ✅ ADD THIS
+# Class Admin
 @admin.register(Class)
 class ClassAdmin(admin.ModelAdmin):
     list_display = ['name', 'section']
