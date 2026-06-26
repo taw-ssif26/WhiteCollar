@@ -1,7 +1,8 @@
 # core/admin.py
+from django import forms
 from django.contrib import admin
-from django.utils import timezone
 from django.contrib.auth.models import User
+from django.utils import timezone
 from .models import *
 
 # Student Admin
@@ -23,12 +24,24 @@ class StudentAdmin(admin.ModelAdmin):
         }),
     )
     
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if not obj:  # Creating new student
+            form.base_fields['password'] = forms.CharField(
+                widget=forms.PasswordInput,
+                required=False,
+                help_text="Leave blank to use default 'student123'"
+            )
+        return form
+    
     def save_model(self, request, obj, form, change):
         if not change:  # Creating a new student
-            # Create a User for the student
+            password = form.cleaned_data.get('password', 'student123')
+            if not password:
+                password = 'student123'
             user = User.objects.create_user(
                 username=obj.student_id,
-                password='student123',  # Default password
+                password=password,
                 email=obj.email
             )
             obj.user = user
