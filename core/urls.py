@@ -38,6 +38,8 @@ urlpatterns = [
     # Student management
     path('admin/students/', views.student_list, name='student_list'),
     path('admin/students/add/', views.student_add, name='student_add'),
+    path('admin/students/bulk-upload/', views.student_bulk_upload, name='student_bulk_upload'),
+    path('admin/students/download-template/', views.student_download_template, name='student_download_template'),
     path('admin/students/edit/<int:pk>/', views.student_edit, name='student_edit'),
     path('admin/students/delete/<int:pk>/', views.student_delete, name='student_delete'),
     
