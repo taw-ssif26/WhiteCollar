@@ -1,54 +1,68 @@
 {% extends 'core/base.html' %}
 
 {% block title %}Manage Students{% endblock %}
-{% load static %}
+
 {% block content %}
-<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-7xl mx-auto">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-        <h1 class="font-display-lg text-3xl md:text-4xl text-secondary font-['EB_Garamond']">Manage Students</h1>
-        <div class="flex gap-3">
-            <a href="{% url 'student_add' %}" class="bg-secondary text-on-secondary px-8 py-3 rounded-full font-label-caps text-sm font-bold hover:shadow-[0_0_20px_rgba(233,193,118,0.4)] transition-all">
-                + Add Student
-            </a>
-            <a href="{% url 'admin_dashboard' %}" class="glass-card px-6 py-3 rounded-full text-sm hover:border-secondary transition-all">Back</a>
+<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-7xl mx-auto relative">
+    <div class="particles-container" data-count="20" data-color="#e9c176" data-speed="0.15" data-size="1.5" data-opacity="0.2" data-connected="false"></div>
+    
+    <div class="relative z-10">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+            <h1 class="font-display-lg text-3xl md:text-4xl text-secondary font-['EB_Garamond']">Manage Students</h1>
+            <div class="flex flex-wrap gap-3">
+                <a href="{% url 'student_add' %}" class="bg-secondary text-on-secondary px-6 py-2 rounded-full font-label-caps text-sm font-bold hover:shadow-[0_0_20px_rgba(233,193,118,0.4)] transition-all">
+                    + Add Student
+                </a>
+                <a href="{% url 'student_bulk_upload' %}" class="glass-card px-6 py-2 rounded-full text-sm hover:border-secondary transition-all flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">upload_file</span>
+                    Bulk Upload
+                </a>
+                <a href="{% url 'admin_dashboard' %}" class="glass-card px-6 py-2 rounded-full text-sm hover:border-secondary transition-all">Back</a>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-2xl overflow-x-auto">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-on-surface-variant text-sm">{{ students.count }} students found</span>
+            </div>
+            
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-white/10">
+                        <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">ID</th>
+                        <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Name</th>
+                        <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Class</th>
+                        <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Roll</th>
+                        <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Phone</th>
+                        <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <td class="py-3 text-on-surface font-mono text-sm">{{ student.student_id }}</td>
+                        <td class="py-3 text-on-surface">{{ student.name }}</td>
+                        <td class="py-3 text-on-surface-variant text-sm">{{ student.class_name }}</td>
+                        <td class="py-3 text-on-surface-variant text-sm">{{ student.roll }}</td>
+                        <td class="py-3 text-on-surface-variant text-sm">{{ student.phone }}</td>
+                        <td class="py-3">
+                            <div class="flex gap-2">
+                                <a href="{% url 'student_edit' student.id %}" class="text-secondary hover:underline text-sm">Edit</a>
+                                <a href="{% url 'student_delete' student.id %}" class="text-red-400 hover:text-red-500 text-sm" onclick="return confirm('Delete {{ student.name }}?')">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-8 text-on-surface-variant text-center">
+                            No students found. 
+                            <a href="{% url 'student_add' %}" class="text-secondary hover:underline">Add your first student →</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-
-    <div class="glass-card p-6 rounded-2xl overflow-x-auto">
-        <table class="w-full">
-            <thead>
-                <tr class="border-b border-white/10">
-                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">ID</th>
-                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Name</th>
-                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Class</th>
-                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Roll</th>
-                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Phone</th>
-                    <th class="text-left py-3 font-label-caps text-xs text-secondary tracking-widest">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for student in students %}
-                <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td class="py-3 text-on-surface">{{ student.student_id }}</td>
-                    <td class="py-3 text-on-surface">{{ student.name }}</td>
-                    <td class="py-3 text-on-surface-variant text-sm">{{ student.class_name }}</td>
-                    <td class="py-3 text-on-surface-variant text-sm">{{ student.roll }}</td>
-                    <td class="py-3 text-on-surface-variant text-sm">{{ student.phone }}</td>
-                    <td class="py-3">
-                        <div class="flex gap-2">
-                            <a href="{% url 'student_edit' student.id %}" class="text-secondary hover:underline text-sm">Edit</a>
-                            <a href="{% url 'student_delete' student.id %}" class="text-red-400 hover:text-red-500 text-sm" onclick="return confirm('Delete {{ student.name }}?')">Delete</a>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="py-8 text-on-surface-variant text-center">No students added yet.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
 </div>
-<script src="{% static 'js/particles.js' %}"></script>
 {% endblock %}
