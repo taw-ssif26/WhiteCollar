@@ -1,5 +1,4 @@
 # core/views.py
-# core/views.py - At the very top
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -9,8 +8,10 @@ from django.utils import timezone
 from datetime import datetime
 import json
 import os
+import openpyxl
 from .models import *
-from .forms import *  # ← MAKE SURE THIS LINE EXISTS
+from .forms import *
+
 def is_admin(user):
     return user.is_superuser or user.is_staff
 
@@ -153,7 +154,9 @@ def student_dashboard(request):
     attendances = all_attendances[:10]
     results = student.results.all().order_by('-exam_date')[:5]
     invoices = student.invoices.all().order_by('-generated_date')[:5]
-    routine = Routine.objects.filter(class_obj__name=student.class_name)
+    
+    # ✅ FIXED: Use class_obj instead of class_name
+    routine = Routine.objects.filter(class_obj=student.class_obj) if student.class_obj else []
 
     graph_results = student.results.all().order_by('exam_date')[:10]
     exam_names = []
@@ -197,7 +200,8 @@ def routine_view(request):
         return render(request, 'core/routine_admin.html', {'routines': routines})
     else:
         student = request.user.student
-        routines = Routine.objects.filter(class_obj__name=student.class_name)
+        # ✅ FIXED: Use class_obj instead of class_name
+        routines = Routine.objects.filter(class_obj=student.class_obj) if student.class_obj else []
         return render(request, 'core/routine.html', {'routines': routines})
 
 @login_required
@@ -349,8 +353,6 @@ def attendance_history(request, student_id=None):
 # ATTENDANCE MANAGEMENT (Admin)
 # ============================================
 
-# core/views.py - Complete attendance_manage function
-
 @user_passes_test(is_admin)
 def attendance_manage(request):
     if request.method == 'POST':
@@ -437,8 +439,6 @@ Please contact the admin if you have any questions.
 # ADMIN VIEWS
 # ============================================
 
-# core/views.py - admin_dashboard function
-
 @user_passes_test(is_admin)
 def admin_dashboard(request):
     context = {
@@ -451,6 +451,7 @@ def admin_dashboard(request):
         'recent_invoices': Invoice.objects.filter(status='pending').order_by('-generated_date')[:10],
     }
     return render(request, 'core/admin_dashboard.html', context)
+
 # ============================================
 # STUDENT MANAGEMENT (Admin)
 # ============================================
@@ -469,8 +470,95 @@ def student_add(request):
             messages.success(request, f'Student {student.name} added successfully!')
             return redirect('student_list')
     else:
-        form = StudentForm()
+        # Generate next student ID
+        last_student = Student.objects.all().order_by('-id').first()
+        if last_student and last_student.student_id.isdigit():
+            next_id = int(last_student.student_id) + 1
+            next_student_id = str(next_id).zfill(7)
+        else:
+            next_student_id = '2024001'
+        
+        form = StudentForm(initial={'student_id': next_student_id})
+    
     return render(request, 'core/student_form.html', {'form': form, 'title': 'Add Student'})
+
+@user_passes_test(is_admin)
+def student_bulk_upload(request):
+    if request.method == 'POST':
+        form = ExcelUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            excel_file = request.FILES['excel_file']
+            try:
+                workbook = openpyxl.load_workbook(excel_file)
+                sheet = workbook.active
+                
+                success_count = 0
+                error_count = 0
+                errors = []
+                
+                for row in sheet.iter_rows(min_row=2, values_only=True):
+                    try:
+                        student_id, name, email, phone, guardian_phone, class_name, section, roll, school_name, password = row
+                        
+                        if not student_id or not name:
+                            continue
+                        
+                        # Get or create class
+                        class_obj, created = Class.objects.get_or_create(
+                            name=class_name or 'Class 10',
+                            section=section or 'A'
+                        )
+                        
+                        # Create user
+                        user = User.objects.create_user(
+                            username=str(student_id),
+                            password=str(password) if password else 'student123'
+                        )
+                        
+                        # Create student
+                        Student.objects.create(
+                            user=user,
+                            student_id=str(student_id),
+                            name=str(name),
+                            email=str(email) if email else '',
+                            phone=str(phone) if phone else '',
+                            guardian_phone=str(guardian_phone) if guardian_phone else '',
+                            class_obj=class_obj,
+                            roll=str(roll) if roll else '',
+                            school_name=str(school_name) if school_name else ''
+                        )
+                        success_count += 1
+                    except Exception as e:
+                        error_count += 1
+                        errors.append(f'Row error: {str(e)}')
+                
+                messages.success(request, f'✅ Successfully imported {success_count} students!')
+                if error_count > 0:
+                    messages.warning(request, f'⚠️ {error_count} errors occurred.')
+                return redirect('student_list')
+                
+            except Exception as e:
+                messages.error(request, f'Error processing file: {str(e)}')
+                return redirect('student_bulk_upload')
+    else:
+        form = ExcelUploadForm()
+    return render(request, 'core/student_bulk_upload.html', {'form': form})
+
+@user_passes_test(is_admin)
+def student_download_template(request):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = 'Students'
+    
+    headers = ['student_id', 'name', 'email', 'phone', 'guardian_phone', 'class_name', 'section', 'roll', 'school_name', 'password']
+    ws.append(headers)
+    ws.append(['2024001', 'John Doe', 'john@example.com', '+8801234567890', '+8801234567891', 'Class 10', 'A', '01', 'Example School', 'student123'])
+    ws.append(['2024002', 'Jane Smith', 'jane@example.com', '+8801234567892', '+8801234567893', 'IELTS', 'Morning', '02', 'Another School', 'student123'])
+    
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=students_template.xlsx'
+    wb.save(response)
+    return response
 
 @user_passes_test(is_admin)
 def student_edit(request, pk):
