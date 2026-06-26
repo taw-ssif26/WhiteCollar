@@ -1,31 +1,90 @@
 {% extends 'core/base.html' %}
+{% load static %}
 
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-3xl mx-auto">
-    <div class="flex items-center gap-4 mb-8">
-        <a href="{% url 'student_list' %}" class="text-secondary hover:underline">← Back</a>
-        <h1 class="font-display-lg text-3xl md:text-4xl text-secondary font-['EB_Garamond']">{{ title }}</h1>
-    </div>
+<div class="min-h-screen py-12 px-4 md:px-12 lg:px-16 max-w-3xl mx-auto relative">
+    <div class="particles-container" data-count="20" data-color="#e9c176" data-speed="0.15" data-size="1.5" data-opacity="0.2" data-connected="false"></div>
+    
+    <div class="relative z-10">
+        <div class="flex items-center gap-4 mb-8">
+            <a href="{% url 'student_list' %}" class="text-secondary hover:underline">← Back</a>
+            <h1 class="font-display-lg text-3xl md:text-4xl text-secondary font-['EB_Garamond']">{{ title }}</h1>
+        </div>
 
-    <div class="glass-card p-8 md:p-12 rounded-3xl">
-        <form method="POST" class="space-y-6">
-            {% csrf_token %}
-            {% for field in form %}
-            <div>
-                <label class="font-label-caps text-xs text-secondary block mb-2">{{ field.label|upper }}</label>
-                {{ field }}
-                {% if field.errors %}
-                <p class="text-red-400 text-sm mt-1">{{ field.errors.0 }}</p>
+        <div class="glass-card p-8 md:p-12 rounded-3xl">
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="bg-red-500/20 border border-red-500/50 p-4 rounded-xl">
+                    {% for error in form.non_field_errors %}
+                    <p class="text-red-400">{{ error }}</p>
+                    {% endfor %}
+                </div>
                 {% endif %}
-            </div>
-            {% endfor %}
-            <button type="submit" 
-                    class="w-full bg-secondary text-on-secondary py-4 rounded-xl font-label-caps text-sm font-bold tracking-[0.2em] hover:shadow-[0_0_30px_rgba(233,193,118,0.4)] transition-all">
-                {{ title|upper }}
-            </button>
-        </form>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="font-label-caps text-xs text-secondary block mb-2">STUDENT ID *</label>
+                        {{ form.student_id }}
+                        {% if form.student_id.errors %}
+                        <p class="text-red-400 text-sm mt-1">{{ form.student_id.errors.0 }}</p>
+                        {% endif %}
+                        <p class="text-on-surface-variant text-xs mt-1">Unique ID for login (e.g., 2024001)</p>
+                    </div>
+                    <div>
+                        <label class="font-label-caps text-xs text-secondary block mb-2">PASSWORD</label>
+                        {{ form.password }}
+                        <p class="text-on-surface-variant text-xs mt-1">Default: student123</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="font-label-caps text-xs text-secondary block mb-2">FULL NAME *</label>
+                    {{ form.name }}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="font-label-caps text-xs text-secondary block mb-2">EMAIL *</label>
+                        {{ form.email }}
+                    </div>
+                    <div>
+                        <label class="font-label-caps text-xs text-secondary block mb-2">PHONE *</label>
+                        {{ form.phone }}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="font-label-caps text-xs text-secondary block mb-2">GUARDIAN'S PHONE *</label>
+                    {{ form.guardian_phone }}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="font-label-caps text-xs text-secondary block mb-2">CLASS *</label>
+                        {{ form.class_obj }}
+                        <p class="text-on-surface-variant text-xs mt-1">Select the class this student belongs to</p>
+                    </div>
+                    <div>
+                        <label class="font-label-caps text-xs text-secondary block mb-2">ROLL *</label>
+                        {{ form.roll }}
+                    </div>
+                </div>
+
+                <div>
+                    <label class="font-label-caps text-xs text-secondary block mb-2">SCHOOL NAME *</label>
+                    {{ form.school_name }}
+                </div>
+
+                <button type="submit" 
+                        class="w-full bg-secondary text-on-secondary py-4 rounded-xl font-label-caps text-sm font-bold tracking-[0.2em] hover:shadow-[0_0_30px_rgba(233,193,118,0.4)] transition-all">
+                    {{ title|upper }}
+                </button>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}
