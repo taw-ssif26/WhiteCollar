@@ -48,7 +48,7 @@ class ResultAdmin(admin.ModelAdmin):
     list_filter = ['exam_name', 'grade']
     search_fields = ['student__name', 'student__student_id']
 
-# ✅ Invoice Admin - REGISTERED
+# Invoice Admin
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
     list_display = ['student', 'month', 'year', 'amount', 'status', 'generated_date']
@@ -72,7 +72,7 @@ class InvoiceAdmin(admin.ModelAdmin):
     )
     
     def save_model(self, request, obj, form, change):
-        if not change:  # New invoice
+        if not change:
             obj.generated_date = timezone.now()
         super().save_model(request, obj, form, change)
 
@@ -112,3 +112,9 @@ class ContactAdmin(admin.ModelAdmin):
     list_display = ['name', 'email', 'phone', 'created_at']
     list_filter = ['created_at']
     search_fields = ['name', 'email']
+
+# Class Admin - ✅ ADD THIS
+@admin.register(Class)
+class ClassAdmin(admin.ModelAdmin):
+    list_display = ['name', 'section']
+    search_fields = ['name', 'section']
