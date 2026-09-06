@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: white-collar-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+      - key: JWT_EXPIRE_MINUTES
+        value: "10080"
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        value: white-collar-photos
+      - key: R2_PUBLIC_URL
+        sync: false
+      - key: GREEN_API_INSTANCE_ID
+        sync: false
+      - key: GREEN_API_TOKEN
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: ADMIN_DEFAULT_PASSWORD
+        value: Admin@WhiteCollar2025

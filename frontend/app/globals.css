@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E2C97E;
+  --gold-dark: #A8882E;
+  --charcoal: #1C1C1E;
+  --charcoal-light: #2C2C2E;
+  --cream: #F5F0E8;
+  --ivory: #FAFAF8;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--ivory);
+  color: var(--charcoal);
+}
+
+.font-serif {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Premium scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #C9A84C40; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #C9A84C; }
+
+/* Gold divider */
+.gold-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #C9A84C, transparent);
+}
+
+/* Subtle entrance animation — one orchestrated moment only */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fadeUp 0.6s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
