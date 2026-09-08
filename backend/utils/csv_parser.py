@@ -1,7 +1,6 @@
-import pandas as pd
+import csv
 import io
 from typing import Any
-
 
 REQUIRED_COLUMNS = {"name", "school_college", "class_level", "batch", "gender", "whatsapp_number"}
 
@@ -17,35 +16,45 @@ COLUMN_ALIASES = {
 
 def parse_student_csv(file_bytes: bytes) -> tuple[list[dict[str, Any]], list[str]]:
     """
-    Parse CSV bytes into student dicts.
+    Parse CSV bytes into student dicts using Python's built-in csv module.
     Returns (valid_rows, errors).
-    Errors are human-readable strings the admin can understand.
     """
     try:
-        # dtype=str prevents pandas from stripping leading zeros from phone numbers
-        df = pd.read_csv(io.BytesIO(file_bytes), dtype=str)
+        text = file_bytes.decode("utf-8-sig")  # strips BOM if present
+        reader = csv.DictReader(io.StringIO(text))
     except Exception as e:
         return [], [f"Could not read CSV file: {str(e)}"]
 
     # Normalize column names
-    df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
-    df.rename(columns=COLUMN_ALIASES, inplace=True)
+    if reader.fieldnames is None:
+        return [], ["CSV file is empty or has no header row."]
 
-    missing = REQUIRED_COLUMNS - set(df.columns)
+    normalized_fields = [f.strip().lower().replace(" ", "_") for f in reader.fieldnames]
+    aliased_fields = [COLUMN_ALIASES.get(f, f) for f in normalized_fields]
+
+    missing = REQUIRED_COLUMNS - set(aliased_fields)
     if missing:
-        return [], [f"CSV is missing required columns: {', '.join(missing)}. Required: {', '.join(REQUIRED_COLUMNS)}"]
+        return [], [
+            f"CSV is missing required columns: {', '.join(sorted(missing))}. "
+            f"Required: {', '.join(sorted(REQUIRED_COLUMNS))}"
+        ]
 
     valid_rows = []
     errors = []
 
-    for idx, row in df.iterrows():
-        row_num = idx + 2  # 1-indexed, +1 for header
+    for idx, row in enumerate(reader):
+        row_num = idx + 2  # 1-indexed + header row
+
+        # Remap keys using normalized + aliased field names
+        normalized_row: dict[str, str] = {}
+        for original_key, aliased_key in zip(reader.fieldnames or [], aliased_fields):
+            normalized_row[aliased_key] = (row.get(original_key) or "").strip()
+
+        name = normalized_row.get("name", "")
+        whatsapp = normalized_row.get("whatsapp_number", "")
+        gender = normalized_row.get("gender", "").lower()
+
         row_errors = []
-
-        name = str(row.get("name", "")).strip()
-        whatsapp = str(row.get("whatsapp_number", "")).strip()
-        gender = str(row.get("gender", "")).strip().lower()
-
         if not name:
             row_errors.append("Name is empty")
         if not whatsapp or len(whatsapp) < 10:
@@ -59,12 +68,12 @@ def parse_student_csv(file_bytes: bytes) -> tuple[list[dict[str, Any]], list[str
 
         valid_rows.append({
             "name": name,
-            "school_college": str(row.get("school_college", "")).strip(),
-            "class_level": str(row.get("class_level", "")).strip(),
-            "batch": str(row.get("batch", "")).strip(),
+            "school_college": normalized_row.get("school_college", ""),
+            "class_level": normalized_row.get("class_level", ""),
+            "batch": normalized_row.get("batch", ""),
             "gender": gender,
-            "whatsapp_number": whatsapp,
-            "email": str(row.get("email", "")).strip() or None,
+            "whatsapp_number": whatsapp,  # preserved exactly as typed — no numeric conversion
+            "email": normalized_row.get("email", "") or None,
         })
 
     return valid_rows, errors
