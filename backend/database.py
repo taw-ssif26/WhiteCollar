@@ -2,17 +2,28 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.orm import DeclarativeBase
 from config import settings
 
-# SQLite (used in tests) does not support pool_size/max_overflow.
-# NeonDB (PostgreSQL) does. Detect by URL prefix.
-_is_sqlite = settings.DATABASE_URL.startswith("sqlite")
+# Convert URL dialect for psycopg3 (async).
+# NeonDB gives: postgresql+asyncpg://... or postgresql://...
+# psycopg async needs: postgresql+psycopg://...
+def _fix_url(url: str) -> str:
+    for prefix in ("postgresql+asyncpg://", "postgresql+aasyncpg://", "postgres://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg://" + url[len(prefix):]
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://"):]
+    # sqlite for testing — leave as-is
+    return url
 
-_engine_kwargs = {"echo": False}
+_url = _fix_url(settings.DATABASE_URL)
+_is_sqlite = _url.startswith("sqlite")
+
+_engine_kwargs: dict = {"echo": False}
 if not _is_sqlite:
     _engine_kwargs["pool_pre_ping"] = True
     _engine_kwargs["pool_size"] = 5
     _engine_kwargs["max_overflow"] = 10
 
-engine = create_async_engine(settings.DATABASE_URL, **_engine_kwargs)
+engine = create_async_engine(_url, **_engine_kwargs)
 
 AsyncSessionLocal = async_sessionmaker(
     engine,
