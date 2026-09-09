@@ -11,7 +11,7 @@ import { useToast } from "@/components/ui/Toast";
 const EMPTY_FORM = {
   student_id: "", amount: "", description: "",
   issue_date: new Date().toISOString().split("T")[0],
-  due_date: "", send_whatsapp: true,
+  due_date: "",
 };
 
 export default function AdminInvoicesPage() {
@@ -226,15 +226,7 @@ export default function AdminInvoicesPage() {
               <Input type="date" value={form.due_date} onChange={set("due_date")} required />
             </Field>
           </div>
-          <label className="flex items-center gap-2 text-sm text-charcoal/70 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.send_whatsapp}
-              onChange={(e) => setForm({ ...form, send_whatsapp: e.target.checked })}
-              className="accent-gold"
-            />
-            Send WhatsApp notification to student
-          </label>
+          <p className="text-xs text-charcoal/50">WhatsApp confirmation will be sent automatically when payment is marked.</p>
           {error && <p className="text-red-500 text-xs bg-red-50 border border-red-200 rounded-sm px-3 py-2">{error}</p>}
           <div className="flex gap-3 pt-1">
             <Button onClick={handleAdd} loading={saving}>Create Invoice</Button>
