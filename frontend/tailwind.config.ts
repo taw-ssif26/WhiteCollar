@@ -26,8 +26,8 @@ const config: Config = {
         ivory: "#FAFAF8",
       },
       fontFamily: {
-        serif: ["Playfair Display", "Georgia", "serif"],
-        sans: ["Inter", "system-ui", "sans-serif"],
+        serif: ["var(--font-playfair)", "Georgia", "serif"],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
       boxShadow: {
         gold: "0 0 0 1px rgba(201, 168, 76, 0.3)",
