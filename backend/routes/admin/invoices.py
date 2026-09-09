@@ -7,18 +7,17 @@ from typing import Optional
 from database import get_db
 from models import Invoice, Student
 from utils.auth import require_admin
-from services.whatsapp import send_whatsapp, build_invoice_message
+from services.whatsapp import send_whatsapp, build_payment_confirmation_message
 
 router = APIRouter(prefix="/admin/invoices", tags=["Admin - Invoices"])
 
 
 class InvoiceCreate(BaseModel):
-    student_id: str  # WC-2025-001
+    student_id: str
     amount: float
     description: str
     issue_date: date
     due_date: date
-    send_whatsapp: bool = True
 
 
 class InvoiceUpdate(BaseModel):
@@ -79,20 +78,8 @@ async def create_invoice(
     await db.commit()
     await db.refresh(invoice)
 
-    whatsapp_sent = False
-    if body.send_whatsapp:
-        message = build_invoice_message(
-            student_name=student.name,
-            invoice_number=invoice_number,
-            amount=body.amount,
-            description=body.description,
-            due_date=str(body.due_date),
-        )
-        whatsapp_sent = await send_whatsapp(student.whatsapp_number, message)
-        invoice.whatsapp_sent = whatsapp_sent
-        await db.commit()
-
-    return {**_invoice_to_dict(invoice, student), "whatsapp_sent": whatsapp_sent}
+    # WhatsApp is sent when marked paid, not on creation
+    return {**_invoice_to_dict(invoice, student), "whatsapp_sent": False}
 
 
 @router.post("/{invoice_id}/mark-paid")
@@ -101,12 +88,32 @@ async def mark_invoice_paid(
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(require_admin),
 ):
-    invoice = await _get_invoice_or_404(db, invoice_id)
+    rows = await db.execute(
+        select(Invoice, Student)
+        .join(Student, Invoice.student_id == Student.id)
+        .where(Invoice.id == invoice_id)
+    )
+    row = rows.first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+
+    invoice, student = row
     invoice.is_paid = True
     invoice.paid_at = datetime.now(timezone.utc)
+
+    # Send WhatsApp payment confirmation
+    message = build_payment_confirmation_message(
+        student_name=student.name,
+        invoice_number=invoice.invoice_number,
+        amount=float(invoice.amount),
+        description=invoice.description,
+        paid_at=str(datetime.now(timezone.utc).strftime("%d %b %Y")),
+    )
+    sent = await send_whatsapp(student.whatsapp_number, message)
+    invoice.whatsapp_sent = sent
     await db.commit()
-    student = await db.get(Student, invoice.student_id)
-    return _invoice_to_dict(invoice, student)
+
+    return {**_invoice_to_dict(invoice, student), "whatsapp_sent": sent}
 
 
 @router.post("/{invoice_id}/send-whatsapp")
@@ -125,12 +132,12 @@ async def resend_invoice_whatsapp(
         raise HTTPException(status_code=404, detail="Invoice not found")
 
     invoice, student = row
-    message = build_invoice_message(
+    message = build_payment_confirmation_message(
         student_name=student.name,
         invoice_number=invoice.invoice_number,
         amount=float(invoice.amount),
         description=invoice.description,
-        due_date=str(invoice.due_date),
+        paid_at=str(invoice.paid_at.strftime("%d %b %Y")) if invoice.paid_at else "N/A",
     )
     sent = await send_whatsapp(student.whatsapp_number, message)
     if sent:
