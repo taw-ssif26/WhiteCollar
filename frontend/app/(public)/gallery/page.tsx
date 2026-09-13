@@ -6,9 +6,9 @@ import { publicAPI } from "@/lib/api";
 import { ImageIcon } from "lucide-react";
 
 const MOCK_GALLERY = [
-  { id: "1", title: "IELTS Batch — Spring 2025", category: "Classes", image_url: null },
+  { id: "1", title: "SSC Batch — Spring 2025", category: "Classes", image_url: null },
   { id: "2", title: "Annual Olympiad Ceremony", category: "Events", image_url: null },
-  { id: "3", title: "Corporate Workshop", category: "Events", image_url: null },
+  { id: "3", title: "BCS English Workshop", category: "Events", image_url: null },
   { id: "4", title: "Classroom Session — Batch B", category: "Classes", image_url: null },
   { id: "5", title: "Certificate Distribution", category: "Achievements", image_url: null },
   { id: "6", title: "Speaking Practice Session", category: "Classes", image_url: null },
