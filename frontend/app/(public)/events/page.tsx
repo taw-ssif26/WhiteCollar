@@ -13,7 +13,27 @@ async function getEvents() {
 }
 
 const MOCK_EVENTS = [
-
+  {
+    id: "1",
+    title: "SSC English Model Test — Full Paper",
+    description: "A full-length SSC English First and Second Paper mock exam under board conditions. Results and feedback provided within 48 hours. Open to all SSC batch students.",
+    event_date: "2025-10-15T09:00:00",
+    image_url: null,
+  },
+  {
+    id: "2",
+    title: "BCS English Workshop — Prelim Special",
+    description: "Intensive one-day BCS preliminary English session covering grammar rules, vocabulary, and translation technique. Targeted at upcoming BCS candidates.",
+    event_date: "2025-11-05T10:00:00",
+    image_url: null,
+  },
+  {
+    id: "3",
+    title: "Admission Test Preparation Camp",
+    description: "Three-day English preparation camp for university and medical admission tests — DU, CUET, and medical cluster patterns. Limited seats.",
+    event_date: "2025-12-01T09:00:00",
+    image_url: null,
+  },
 ];
 
 export default async function EventsPage() {
