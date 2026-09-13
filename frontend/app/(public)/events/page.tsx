@@ -13,27 +13,7 @@ async function getEvents() {
 }
 
 const MOCK_EVENTS = [
-  {
-    id: "1",
-    title: "IELTS Masterclass — Speaking Module",
-    description: "A focused 3-hour deep-dive into the IELTS Speaking test. Live mock interviews, common pitfalls, and band-score optimisation strategies. Open to all enrolled students and walk-ins.",
-    event_date: "2025-10-15T14:00:00",
-    image_url: null,
-  },
-  {
-    id: "2",
-    title: "Corporate English Workshop",
-    description: "Half-day intensive on business writing, email etiquette, and presentation delivery for professionals. Certificates of participation issued.",
-    event_date: "2025-11-02T10:00:00",
-    image_url: null,
-  },
-  {
-    id: "3",
-    title: "Annual English Olympiad 2025",
-    description: "Inter-batch competition covering vocabulary, comprehension, and debate. Top performers receive scholarship discounts for the next term.",
-    event_date: "2025-12-10T09:00:00",
-    image_url: null,
-  },
+
 ];
 
 export default async function EventsPage() {
