@@ -234,3 +234,35 @@ def _gallery_dict(g: Gallery) -> dict:
         "category": g.category,
         "created_at": g.created_at.isoformat(),
     }
+
+
+# ─── Enquiries ────────────────────────────────────────────────────────────────
+
+@router.get("/enquiries")
+async def list_enquiries(db: AsyncSession = Depends(get_db), _: dict = Depends(require_admin)):
+    from models import Enquiry
+    r = await db.execute(select(Enquiry).order_by(Enquiry.created_at.desc()))
+    enquiries = r.scalars().all()
+    return [
+        {
+            "id": str(e.id),
+            "name": e.name,
+            "phone": e.phone,
+            "email": e.email,
+            "message": e.message,
+            "is_read": e.is_read,
+            "created_at": e.created_at.isoformat(),
+        }
+        for e in enquiries
+    ]
+
+
+@router.post("/enquiries/{enquiry_id}/mark-read")
+async def mark_enquiry_read(enquiry_id: str, db: AsyncSession = Depends(get_db), _: dict = Depends(require_admin)):
+    from models import Enquiry
+    e = await db.get(Enquiry, enquiry_id)
+    if not e:
+        raise HTTPException(status_code=404, detail="Enquiry not found")
+    e.is_read = True
+    await db.commit()
+    return {"message": "Marked as read"}
