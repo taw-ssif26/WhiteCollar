@@ -3,9 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "White-Collar | Career & Academic English Care",
-  description:
-    "Bangladesh's premier English coaching centre for career and academic excellence.",
-  keywords: "English coaching Bangladesh, IELTS preparation, corporate English, Chattogram",
+  description: "Chattogram's premier English coaching centre for SSC, HSC, BCS, and admission preparation.",
+  keywords: "English coaching Chittagong, SSC English, HSC English, BCS English, admission coaching, Halishahar",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
