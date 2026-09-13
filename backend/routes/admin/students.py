@@ -28,6 +28,7 @@ class StudentCreate(BaseModel):
     email: Optional[str] = None
     whatsapp_number: str
     password: Optional[str] = None  # defaults to student_id if not provided
+    monthly_fee: Optional[float] = None
 
 
 class StudentUpdate(BaseModel):
@@ -40,6 +41,7 @@ class StudentUpdate(BaseModel):
     whatsapp_number: Optional[str] = None
     is_active: Optional[bool] = None
     password: Optional[str] = None
+    monthly_fee: Optional[float] = None
 
 
 @router.get("")
@@ -87,6 +89,7 @@ async def create_student(
         email=body.email,
         whatsapp_number=body.whatsapp_number,
         password_hash=hash_password(password),
+        monthly_fee=body.monthly_fee,
     )
     db.add(student)
     await db.commit()
@@ -223,5 +226,6 @@ def _student_to_dict(s: Student) -> dict:
         "whatsapp_number": s.whatsapp_number,
         "photo_url": s.photo_url,
         "is_active": s.is_active,
+        "monthly_fee": float(s.monthly_fee) if s.monthly_fee else None,
         "created_at": s.created_at.isoformat(),
     }
