@@ -19,7 +19,7 @@ class Student(Base):
     __tablename__ = "students"
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    student_id: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)  # e.g. WC-2025-001
+    student_id: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     name: Mapped[str] = mapped_column(String(150), nullable=False)
     school_college: Mapped[str] = mapped_column(String(200), nullable=False)
     class_level: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -29,6 +29,7 @@ class Student(Base):
     whatsapp_number: Mapped[str] = mapped_column(String(20), nullable=False)
     photo_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    monthly_fee: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
 
@@ -89,4 +90,16 @@ class Gallery(Base):
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     image_url: Mapped[str] = mapped_column(String(500), nullable=False)
     category: Mapped[str] = mapped_column(String(100), nullable=False, default="General")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
+
+
+class Enquiry(Base):
+    __tablename__ = "enquiries"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name: Mapped[str] = mapped_column(String(150), nullable=False)
+    phone: Mapped[str] = mapped_column(String(20), nullable=False)
+    email: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
