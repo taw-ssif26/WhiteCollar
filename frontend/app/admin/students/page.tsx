@@ -9,7 +9,7 @@ import { Field, Input, Select, Button } from "@/components/ui/FormElements";
 
 const EMPTY_FORM = {
   name: "", school_college: "", class_level: "", batch: "",
-  gender: "male", email: "", whatsapp_number: "", password: "",
+  gender: "male", email: "", whatsapp_number: "", password: "", monthly_fee: "",
 };
 
 export default function AdminStudentsPage() {
@@ -44,7 +44,10 @@ export default function AdminStudentsPage() {
     setError("");
     setSaving(true);
     try {
-      const res = await studentsAPI.create(form);
+      const res = await studentsAPI.create({
+        ...form,
+        monthly_fee: form.monthly_fee ? parseFloat(form.monthly_fee) : null,
+      });
       setNewStudentInfo(res.data);
       setShowAdd(false);
       setForm(EMPTY_FORM);
@@ -60,7 +63,10 @@ export default function AdminStudentsPage() {
     setError("");
     setSaving(true);
     try {
-      await studentsAPI.update(showEdit.student_id, form);
+      await studentsAPI.update(showEdit.student_id, {
+        ...form,
+        monthly_fee: form.monthly_fee ? parseFloat(form.monthly_fee) : null,
+      });
       setShowEdit(null);
       setForm(EMPTY_FORM);
       load();
@@ -112,6 +118,7 @@ export default function AdminStudentsPage() {
       email: student.email || "",
       whatsapp_number: student.whatsapp_number,
       password: "",
+      monthly_fee: student.monthly_fee ? String(student.monthly_fee) : "",
     });
     setError("");
   };
@@ -399,6 +406,9 @@ function StudentForm({ form, setForm, error, onSubmit, saving, onCancel, submitL
         </Field>
         <Field label="Email (optional)">
           <Input type="email" value={form.email} onChange={set("email")} placeholder="student@example.com" />
+        </Field>
+        <Field label="Monthly Fee (৳)" hint="Set to auto-generate invoices on the 1st of each month">
+          <Input type="number" min="0" value={form.monthly_fee} onChange={set("monthly_fee")} placeholder="e.g. 2500" />
         </Field>
         <Field label={isEdit ? "New Password (leave blank to keep)" : "Password (blank = Student ID)"} className="col-span-2">
           <Input
