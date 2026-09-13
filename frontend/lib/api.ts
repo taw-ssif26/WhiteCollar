@@ -125,6 +125,12 @@ export const studentPortalAPI = {
     api.post("/student/change-password", { current_password, new_password }),
 };
 
+// ─── Admin: Enquiries ─────────────────────────────────────────────────────────
+export const enquiriesAPI = {
+  list: () => api.get("/admin/enquiries"),
+  markRead: (id: string) => api.post(`/admin/enquiries/${id}/mark-read`),
+};
+
 // ─── Public ───────────────────────────────────────────────────────────────────
 export const publicAPI = {
   events: () => api.get("/public/events"),
