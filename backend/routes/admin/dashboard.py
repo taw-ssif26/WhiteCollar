@@ -266,3 +266,71 @@ async def mark_enquiry_read(enquiry_id: str, db: AsyncSession = Depends(get_db),
     e.is_read = True
     await db.commit()
     return {"message": "Marked as read"}
+
+
+# ─── Reviews ──────────────────────────────────────────────────────────────────
+
+@router.get("/reviews")
+async def list_reviews(db: AsyncSession = Depends(get_db), _: dict = Depends(require_admin)):
+    from models import Review
+    r = await db.execute(select(Review).order_by(Review.created_at.desc()))
+    return [
+        {
+            "id": str(rv.id),
+            "name": rv.name,
+            "role": rv.role,
+            "text": rv.text,
+            "rating": rv.rating,
+            "is_approved": rv.is_approved,
+            "created_at": rv.created_at.isoformat(),
+        }
+        for rv in r.scalars().all()
+    ]
+
+
+@router.post("/reviews/{review_id}/approve")
+async def approve_review(review_id: str, db: AsyncSession = Depends(get_db), _: dict = Depends(require_admin)):
+    from models import Review
+    rv = await db.get(Review, review_id)
+    if not rv:
+        raise HTTPException(status_code=404, detail="Review not found")
+    rv.is_approved = True
+    await db.commit()
+    return {"message": "Review approved"}
+
+
+@router.delete("/reviews/{review_id}", status_code=204)
+async def delete_review(review_id: str, db: AsyncSession = Depends(get_db), _: dict = Depends(require_admin)):
+    from models import Review
+    rv = await db.get(Review, review_id)
+    if not rv:
+        raise HTTPException(status_code=404, detail="Review not found")
+    await db.delete(rv)
+    await db.commit()
+
+
+# ─── Monthly Fee Management ───────────────────────────────────────────────────
+
+class SetMonthlyFeeRequest(BaseModel):
+    monthly_fee: Optional[float]
+
+
+@router.put("/students/{student_id}/monthly-fee")
+async def set_monthly_fee(
+    student_id: str,
+    body: SetMonthlyFeeRequest,
+    db: AsyncSession = Depends(get_db),
+    _: dict = Depends(require_admin),
+):
+    from models import Student
+    r = await db.execute(select(Student).where(Student.student_id == student_id))
+    student = r.scalar_one_or_none()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    student.monthly_fee = body.monthly_fee
+    await db.commit()
+    return {
+        "student_id": student.student_id,
+        "name": student.name,
+        "monthly_fee": float(student.monthly_fee) if student.monthly_fee else None,
+    }
