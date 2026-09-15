@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Users, FileText, Receipt,
-  CalendarDays, Image, LogOut, X, MessageSquare,
+  CalendarDays, Image, LogOut, X, MessageSquare, Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,7 @@ const navItems = [
   { href: "/admin/events", icon: <CalendarDays size={18} />, label: "Events" },
   { href: "/admin/gallery", icon: <Image size={18} />, label: "Gallery" },
   { href: "/admin/enquiries", icon: <MessageSquare size={18} />, label: "Enquiries" },
+  { href: "/admin/reviews", icon: <Star size={18} />, label: "Reviews" },
 ];
 
 interface Props {
