@@ -125,6 +125,19 @@ export const studentPortalAPI = {
     api.post("/student/change-password", { current_password, new_password }),
 };
 
+// ─── Admin: Reviews ───────────────────────────────────────────────────────────
+export const reviewsAdminAPI = {
+  list: () => api.get("/admin/reviews"),
+  approve: (id: string) => api.post(`/admin/reviews/${id}/approve`),
+  delete: (id: string) => api.delete(`/admin/reviews/${id}`),
+};
+
+// ─── Admin: Monthly Fee ───────────────────────────────────────────────────────
+export const monthlyFeeAPI = {
+  set: (studentId: string, monthly_fee: number | null) =>
+    api.put(`/admin/students/${studentId}/monthly-fee`, { monthly_fee }),
+};
+
 // ─── Admin: Enquiries ─────────────────────────────────────────────────────────
 export const enquiriesAPI = {
   list: () => api.get("/admin/enquiries"),
@@ -136,4 +149,7 @@ export const publicAPI = {
   events: () => api.get("/public/events"),
   gallery: (category?: string) => api.get("/public/gallery", { params: { category } }),
   galleryCategories: () => api.get("/public/gallery/categories"),
+  reviews: () => api.get("/public/reviews"),
+  submitReview: (data: { name: string; role: string; text: string; rating: number }) =>
+    api.post("/public/reviews", data),
 };
