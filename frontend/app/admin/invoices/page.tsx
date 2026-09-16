@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { invoicesAPI, studentsAPI } from "@/lib/api";
 import { formatDate, formatCurrency } from "@/lib/utils";
-import { Plus, CheckCircle, Trash2, Send, Search } from "lucide-react";
+import { Plus, CheckCircle, Trash2, Send, Search, Download } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import { Field, Input, Select, Button, Textarea } from "@/components/ui/FormElements";
 import { useToast } from "@/components/ui/Toast";
+import { generateInvoicePDF } from "@/lib/pdf";
+import { formatDate as fmtDate } from "@/lib/utils";
 
 const EMPTY_FORM = {
   student_id: "", amount: "", description: "",
@@ -44,6 +46,20 @@ export default function AdminInvoicesPage() {
   );
 
   const totalUnpaid = invoices.filter((i) => !i.is_paid).reduce((s, i) => s + i.amount, 0);
+
+  const handleDownload = (inv: any) => {
+    generateInvoicePDF({
+      invoice_number: inv.invoice_number,
+      student_name: inv.student_name,
+      student_id: inv.student_id,
+      description: inv.description,
+      amount: inv.amount,
+      issue_date: fmtDate(inv.issue_date),
+      due_date: fmtDate(inv.due_date),
+      is_paid: inv.is_paid,
+      paid_at: inv.paid_at ? fmtDate(inv.paid_at) : null,
+    });
+  };
 
   const handleAdd = async () => {
     setError("");
@@ -182,6 +198,13 @@ export default function AdminInvoicesPage() {
                           title="Resend WhatsApp"
                         >
                           <Send size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDownload(inv)}
+                          className="p-1.5 text-charcoal/40 hover:text-gold hover:bg-gold/10 rounded-sm transition-colors"
+                          title="Download PDF"
+                        >
+                          <Download size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(inv.id)}
