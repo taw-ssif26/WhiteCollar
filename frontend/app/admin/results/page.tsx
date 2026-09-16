@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { resultsAPI, studentsAPI } from "@/lib/api";
 import { formatDate, getGrade } from "@/lib/utils";
-import { Plus, Trash2, Send, Search } from "lucide-react";
+import { Plus, Trash2, Send, Search, Download, FileBarChart } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import { Field, Input, Select, Button, Textarea } from "@/components/ui/FormElements";
 import { useToast } from "@/components/ui/Toast";
+import { generateResultPDF, generateMonthlyReportPDF } from "@/lib/pdf";
 
 const EMPTY_FORM = {
   student_id: "", exam_name: "", total_marks: "", obtained_marks: "",
@@ -24,6 +25,9 @@ export default function AdminResultsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  // For monthly report
+  const [reportExam, setReportExam] = useState("");
+
   const load = () => {
     setLoading(true);
     Promise.all([resultsAPI.list(), studentsAPI.list()])
@@ -38,6 +42,9 @@ export default function AdminResultsPage() {
     r.student_name.toLowerCase().includes(search.toLowerCase()) ||
     r.exam_name.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Unique exam names for report dropdown
+  const examNames = Array.from(new Set(results.map((r) => r.exam_name)));
 
   const handleAdd = async () => {
     setError("");
@@ -73,14 +80,47 @@ export default function AdminResultsPage() {
   const handleResend = async (id: string) => {
     try {
       const res = await resultsAPI.resendWhatsApp(id);
-      if (res.data.sent) {
-        toast("WhatsApp message sent successfully.");
-      } else {
-        toast("WhatsApp send failed — check Green-API configuration.", "error");
-      }
+      if (res.data.sent) toast("WhatsApp message sent successfully.");
+      else toast("WhatsApp send failed — check Green-API.", "error");
     } catch {
       toast("Failed to send WhatsApp message.", "error");
     }
+  };
+
+  const handleDownloadResult = (r: any) => {
+    generateResultPDF({
+      student_name: r.student_name,
+      student_id: r.student_id,
+      exam_name: r.exam_name,
+      total_marks: r.total_marks,
+      obtained_marks: r.obtained_marks,
+      percentage: r.percentage,
+      exam_date: formatDate(r.exam_date),
+      remarks: r.remarks,
+    });
+  };
+
+  const handleMonthlyReport = () => {
+    const examResults = reportExam
+      ? results.filter((r) => r.exam_name === reportExam)
+      : results;
+    if (examResults.length === 0) {
+      toast("No results found for this selection.", "error");
+      return;
+    }
+    generateMonthlyReportPDF(
+      examResults.map((r) => ({
+        student_name: r.student_name,
+        student_id: r.student_id,
+        exam_name: r.exam_name,
+        total_marks: r.total_marks,
+        obtained_marks: r.obtained_marks,
+        percentage: r.percentage,
+        exam_date: formatDate(r.exam_date),
+        remarks: r.remarks,
+      })),
+      reportExam || "All Exams Report"
+    );
   };
 
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -93,9 +133,29 @@ export default function AdminResultsPage() {
           <h1 className="font-serif text-charcoal text-3xl font-semibold">Results</h1>
           <p className="text-charcoal/50 text-sm mt-1">{results.length} records</p>
         </div>
-        <Button onClick={() => { setShowAdd(true); setForm(EMPTY_FORM); setError(""); }}>
-          <Plus size={16} /> Add Result
-        </Button>
+        <div className="flex gap-2 flex-wrap">
+          {/* Monthly report download */}
+          <div className="flex items-center gap-2 border border-cream-dark rounded-sm px-3 bg-white">
+            <select
+              value={reportExam}
+              onChange={(e) => setReportExam(e.target.value)}
+              className="text-sm text-charcoal/70 py-2 focus:outline-none bg-transparent"
+            >
+              <option value="">All exams</option>
+              {examNames.map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+            <button
+              onClick={handleMonthlyReport}
+              className="flex items-center gap-1.5 text-gold text-sm font-medium hover:text-gold-dark transition-colors"
+              title="Download report PDF"
+            >
+              <FileBarChart size={16} /> Report
+            </button>
+          </div>
+          <Button onClick={() => { setShowAdd(true); setForm(EMPTY_FORM); setError(""); }}>
+            <Plus size={16} /> Add Result
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
@@ -147,25 +207,19 @@ export default function AdminResultsPage() {
                       </td>
                       <td className="px-4 py-3 text-charcoal/60 text-xs">{formatDate(r.exam_date)}</td>
                       <td className="px-4 py-3">
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                          r.whatsapp_sent ? "bg-emerald-100 text-emerald-700" : "bg-yellow-100 text-yellow-700"
-                        }`}>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${r.whatsapp_sent ? "bg-emerald-100 text-emerald-700" : "bg-yellow-100 text-yellow-700"}`}>
                           {r.whatsapp_sent ? "Sent" : "Not sent"}
                         </span>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={() => handleResend(r.id)}
-                            className="p-1.5 text-charcoal/40 hover:text-green-600 hover:bg-green-50 rounded-sm transition-colors"
-                            title="Resend WhatsApp"
-                          >
+                          <button onClick={() => handleDownloadResult(r)} className="p-1.5 text-charcoal/40 hover:text-gold hover:bg-gold/10 rounded-sm transition-colors" title="Download result slip">
+                            <Download size={14} />
+                          </button>
+                          <button onClick={() => handleResend(r.id)} className="p-1.5 text-charcoal/40 hover:text-green-600 hover:bg-green-50 rounded-sm transition-colors" title="Resend WhatsApp">
                             <Send size={14} />
                           </button>
-                          <button
-                            onClick={() => handleDelete(r.id, r.student_name)}
-                            className="p-1.5 text-charcoal/40 hover:text-red-500 hover:bg-red-50 rounded-sm transition-colors"
-                          >
+                          <button onClick={() => handleDelete(r.id, r.student_name)} className="p-1.5 text-charcoal/40 hover:text-red-500 hover:bg-red-50 rounded-sm transition-colors">
                             <Trash2 size={14} />
                           </button>
                         </div>
@@ -186,9 +240,7 @@ export default function AdminResultsPage() {
             <Select value={form.student_id} onChange={set("student_id")} required>
               <option value="">Select a student…</option>
               {students.map((s) => (
-                <option key={s.student_id} value={s.student_id}>
-                  {s.name} ({s.student_id})
-                </option>
+                <option key={s.student_id} value={s.student_id}>{s.name} ({s.student_id})</option>
               ))}
             </Select>
           </Field>
@@ -207,15 +259,10 @@ export default function AdminResultsPage() {
             <Input type="date" value={form.exam_date} onChange={set("exam_date")} required />
           </Field>
           <Field label="Remarks (optional)">
-            <Textarea value={form.remarks} onChange={set("remarks")} placeholder="Excellent performance in speaking section…" rows={2} />
+            <Textarea value={form.remarks} onChange={set("remarks")} placeholder="Excellent performance…" rows={2} />
           </Field>
           <label className="flex items-center gap-2 text-sm text-charcoal/70 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.send_whatsapp}
-              onChange={(e) => setForm({ ...form, send_whatsapp: e.target.checked })}
-              className="accent-gold"
-            />
+            <input type="checkbox" checked={form.send_whatsapp} onChange={(e) => setForm({ ...form, send_whatsapp: e.target.checked })} className="accent-gold" />
             Send WhatsApp notification to student
           </label>
           {error && <p className="text-red-500 text-xs bg-red-50 border border-red-200 rounded-sm px-3 py-2">{error}</p>}
