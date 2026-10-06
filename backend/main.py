@@ -8,7 +8,11 @@ from models import Admin
 from utils.auth import hash_password
 from database import AsyncSessionLocal
 from sqlalchemy import select
-
+#Temp
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import Depends
+#temp
 # Routes
 from routes.auth import router as auth_router
 from routes.admin.students import router as admin_students_router
@@ -83,6 +87,18 @@ app.include_router(hall_of_fame_public_router)
 async def health():
     return {"status": "ok", "service": "White-Collar English Care API"}
 
+#temp
+@app.get("/debug/database")
+async def debug_database(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(text("""
+        SELECT
+            current_database(),
+            current_schema(),
+            current_user
+    """))
+
+    row = result.fetchone()
+#temp
 
 @app.post("/trigger/monthly-reminders")
 async def trigger_monthly_reminders():
