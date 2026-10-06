@@ -3,16 +3,26 @@
 import { useEffect, useState, useRef } from "react";
 import { studentsAPI } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
-import { Plus, Search, Upload, Edit2, Trash2, UserCheck, UserX, Send } from "lucide-react";
+import { Plus, Search, Upload, Edit2, Trash2, UserCheck, UserX } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import { Field, Input, Select, Button } from "@/components/ui/FormElements";
+import { useToast } from "@/components/ui/Toast";
 
 const EMPTY_FORM = {
-  name: "", school_college: "", class_level: "", batch: "",
-  gender: "male", email: "", whatsapp_number: "", password: "", monthly_fee: "",
+  student_id: "",
+  name: "",
+  school_college: "",
+  class_level: "",
+  batch: "",
+  gender: "male",
+  email: "",
+  whatsapp_number: "",
+  password: "",
+  monthly_fee: "",
 };
 
 export default function AdminStudentsPage() {
+  const { toast } = useToast();
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -26,22 +36,25 @@ export default function AdminStudentsPage() {
   const [newStudentInfo, setNewStudentInfo] = useState<any>(null);
   const [bulkResult, setBulkResult] = useState<any>(null);
   const [error, setError] = useState("");
-  const fileRef = useRef<HTMLInputElement>(null);
   const bulkRef = useRef<HTMLInputElement>(null);
 
   const load = () => {
     setLoading(true);
-    studentsAPI.list({ search, batch: filterBatch })
+    studentsAPI
+      .list({ search, batch: filterBatch })
       .then((r) => setStudents(r.data))
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, [search, filterBatch]);
+  useEffect(() => {
+    load();
+  }, [search, filterBatch]);
 
   const batches = Array.from(new Set(students.map((s) => s.batch))).filter(Boolean);
 
   const handleAdd = async () => {
     setError("");
+    if (!form.student_id.trim()) return setError("Student ID is required.");
     setSaving(true);
     try {
       const res = await studentsAPI.create({
@@ -69,6 +82,7 @@ export default function AdminStudentsPage() {
       });
       setShowEdit(null);
       setForm(EMPTY_FORM);
+      toast("Student updated.");
       load();
     } catch (e: any) {
       setError(e.response?.data?.detail || "Failed to update student.");
@@ -80,6 +94,7 @@ export default function AdminStudentsPage() {
   const handleDelete = async (student: any) => {
     if (!confirm(`Delete ${student.name}? This cannot be undone.`)) return;
     await studentsAPI.delete(student.student_id);
+    toast("Student deleted.", "info");
     load();
   };
 
@@ -90,6 +105,7 @@ export default function AdminStudentsPage() {
 
   const handlePhotoUpload = async (studentId: string, file: File) => {
     await studentsAPI.uploadPhoto(studentId, file);
+    toast("Photo uploaded.");
     load();
   };
 
@@ -110,6 +126,7 @@ export default function AdminStudentsPage() {
   const openEdit = (student: any) => {
     setShowEdit(student);
     setForm({
+      student_id: student.student_id,
       name: student.name,
       school_college: student.school_college,
       class_level: student.class_level,
@@ -123,6 +140,10 @@ export default function AdminStudentsPage() {
     setError("");
   };
 
+  const set = (key: string) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => setForm({ ...form, [key]: e.target.value });
+
   return (
     <div className="max-w-6xl mx-auto">
       {/* Header */}
@@ -135,7 +156,13 @@ export default function AdminStudentsPage() {
           <Button variant="ghost" onClick={() => setShowBulk(true)}>
             <Upload size={16} /> Bulk Import
           </Button>
-          <Button onClick={() => { setShowAdd(true); setForm(EMPTY_FORM); setError(""); }}>
+          <Button
+            onClick={() => {
+              setShowAdd(true);
+              setForm(EMPTY_FORM);
+              setError("");
+            }}
+          >
             <Plus size={16} /> Add Student
           </Button>
         </div>
@@ -144,7 +171,10 @@ export default function AdminStudentsPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30" />
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30"
+          />
           <input
             type="text"
             placeholder="Search by name or ID…"
@@ -159,7 +189,11 @@ export default function AdminStudentsPage() {
           className="border border-cream-dark rounded-sm px-3 py-2 text-sm text-charcoal focus:outline-none focus:border-gold bg-white min-w-32"
         >
           <option value="">All Batches</option>
-          {batches.map((b) => <option key={b} value={b}>{b}</option>)}
+          {batches.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -169,13 +203,16 @@ export default function AdminStudentsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-cream-dark bg-cream/50">
-                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-charcoal/50 font-medium">Student</th>
-                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-charcoal/50 font-medium hidden sm:table-cell">ID</th>
-                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-charcoal/50 font-medium hidden md:table-cell">Batch</th>
-                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-charcoal/50 font-medium hidden lg:table-cell">WhatsApp</th>
-                <th className="text-left px-4 py-3 text-xs uppercase tracking-wider text-charcoal/50 font-medium hidden lg:table-cell">Joined</th>
-                <th className="text-center px-4 py-3 text-xs uppercase tracking-wider text-charcoal/50 font-medium">Status</th>
-                <th className="text-right px-4 py-3 text-xs uppercase tracking-wider text-charcoal/50 font-medium">Actions</th>
+                {["Student", "ID", "Batch", "WhatsApp", "Monthly Fee", "Status", "Actions"].map(
+                  (h) => (
+                    <th
+                      key={h}
+                      className="text-left px-4 py-3 text-xs uppercase tracking-wider text-charcoal/50 font-medium"
+                    >
+                      {h}
+                    </th>
+                  )
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-cream-dark">
@@ -201,11 +238,20 @@ export default function AdminStudentsPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {s.photo_url ? (
-                          <img src={s.photo_url} alt={s.name} className="w-8 h-8 rounded-full object-cover border border-cream-dark" />
+                          <img
+                            src={s.photo_url}
+                            alt={s.name}
+                            className="w-8 h-8 rounded-full object-cover border border-cream-dark"
+                          />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-charcoal-light border border-charcoal-muted flex items-center justify-center shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-charcoal-light flex items-center justify-center shrink-0">
                             <span className="text-gold text-xs font-semibold font-serif">
-                              {s.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()}
+                              {s.name
+                                .split(" ")
+                                .map((n: string) => n[0])
+                                .join("")
+                                .slice(0, 2)
+                                .toUpperCase()}
                             </span>
                           </div>
                         )}
@@ -215,16 +261,26 @@ export default function AdminStudentsPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-charcoal/60 hidden sm:table-cell font-mono text-xs">{s.student_id}</td>
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <span className="px-2 py-0.5 bg-cream text-charcoal/70 text-xs rounded-full">{s.batch}</span>
+                    <td className="px-4 py-3 text-charcoal/60 font-mono text-xs">
+                      {s.student_id}
                     </td>
-                    <td className="px-4 py-3 text-charcoal/60 hidden lg:table-cell text-xs">{s.whatsapp_number}</td>
-                    <td className="px-4 py-3 text-charcoal/60 hidden lg:table-cell text-xs">{formatDate(s.created_at)}</td>
+                    <td className="px-4 py-3">
+                      <span className="px-2 py-0.5 bg-cream text-charcoal/70 text-xs rounded-full">
+                        {s.batch}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-charcoal/60 text-xs">{s.whatsapp_number}</td>
+                    <td className="px-4 py-3 text-charcoal/60 text-xs">
+                      {s.monthly_fee ? `BDT ${s.monthly_fee.toLocaleString()}` : "—"}
+                    </td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                        s.is_active ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600"
-                      }`}>
+                      <span
+                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                          s.is_active
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-red-100 text-red-600"
+                        }`}
+                      >
                         {s.is_active ? "Active" : "Inactive"}
                       </span>
                     </td>
@@ -244,8 +300,11 @@ export default function AdminStudentsPage() {
                         >
                           {s.is_active ? <UserX size={14} /> : <UserCheck size={14} />}
                         </button>
-                        <label className="p-1.5 text-charcoal/40 hover:text-gold hover:bg-gold/10 rounded-sm transition-colors cursor-pointer" title="Upload photo">
-                          <Send size={14} />
+                        <label
+                          className="p-1.5 text-charcoal/40 hover:text-gold hover:bg-gold/10 rounded-sm transition-colors cursor-pointer"
+                          title="Upload photo"
+                        >
+                          <Upload size={14} />
                           <input
                             type="file"
                             accept="image/*"
@@ -276,50 +335,82 @@ export default function AdminStudentsPage() {
       {/* Add student modal */}
       <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Add New Student">
         <StudentForm
-          form={form} setForm={setForm} error={error}
-          onSubmit={handleAdd} saving={saving} onCancel={() => setShowAdd(false)}
+          form={form}
+          setForm={setForm}
+          error={error}
+          onSubmit={handleAdd}
+          saving={saving}
+          onCancel={() => setShowAdd(false)}
           submitLabel="Add Student"
+          isEdit={false}
         />
       </Modal>
 
       {/* Edit student modal */}
-      <Modal open={!!showEdit} onClose={() => setShowEdit(null)} title={`Edit — ${showEdit?.name}`}>
+      <Modal
+        open={!!showEdit}
+        onClose={() => setShowEdit(null)}
+        title={`Edit — ${showEdit?.name}`}
+      >
         <StudentForm
-          form={form} setForm={setForm} error={error}
-          onSubmit={handleUpdate} saving={saving} onCancel={() => setShowEdit(null)}
+          form={form}
+          setForm={setForm}
+          error={error}
+          onSubmit={handleUpdate}
+          saving={saving}
+          onCancel={() => setShowEdit(null)}
           submitLabel="Save Changes"
-          isEdit
+          isEdit={true}
         />
       </Modal>
 
       {/* New student credentials modal */}
-      <Modal open={!!newStudentInfo} onClose={() => setNewStudentInfo(null)} title="Student Created">
+      <Modal
+        open={!!newStudentInfo}
+        onClose={() => setNewStudentInfo(null)}
+        title="Student Created"
+      >
         {newStudentInfo && (
           <div className="flex flex-col gap-4">
             <p className="text-charcoal/70 text-sm">
-              Student added successfully. Share these credentials with the student:
+              Student added. Share these login credentials:
             </p>
             <div className="bg-cream rounded-sm p-4 font-mono text-sm space-y-1">
-              <p><span className="text-charcoal/50">Student ID:</span> <strong>{newStudentInfo.student_id}</strong></p>
-              <p><span className="text-charcoal/50">Password:</span> <strong>{newStudentInfo.default_password}</strong></p>
+              <p>
+                <span className="text-charcoal/50">Student ID:</span>{" "}
+                <strong>{newStudentInfo.student_id}</strong>
+              </p>
+              <p>
+                <span className="text-charcoal/50">Password:</span>{" "}
+                <strong>{newStudentInfo.default_password}</strong>
+              </p>
             </div>
-            <p className="text-xs text-charcoal/40">The student can change their password after first login.</p>
+            <p className="text-xs text-charcoal/40">
+              Student can change their password after first login.
+            </p>
             <Button onClick={() => setNewStudentInfo(null)}>Done</Button>
           </div>
         )}
       </Modal>
 
       {/* Bulk import modal */}
-      <Modal open={showBulk} onClose={() => { setShowBulk(false); setBulkResult(null); }} title="Bulk Import Students">
+      <Modal
+        open={showBulk}
+        onClose={() => {
+          setShowBulk(false);
+          setBulkResult(null);
+        }}
+        title="Bulk Import Students"
+      >
         <div className="flex flex-col gap-4">
-          <p className="text-charcoal/70 text-sm">
-            Upload a CSV file with these columns:
-          </p>
+          <p className="text-charcoal/70 text-sm">Upload a CSV with these columns:</p>
           <div className="bg-cream rounded-sm p-3 font-mono text-xs text-charcoal/70">
-            name, school_college, class_level, batch, gender, whatsapp_number, email (optional)
+            student_id, name, school_college, class_level, batch, gender, whatsapp_number, email
+            (optional)
           </div>
           <p className="text-xs text-charcoal/50">
-            Gender must be: male / female / other. Default password for each student will be their Student ID.
+            Gender: male / female / other. Default password = student_id. Student ID must be unique
+            — duplicates are skipped.
           </p>
 
           {!bulkResult ? (
@@ -360,11 +451,20 @@ export default function AdminStudentsPage() {
                     <div className="bg-yellow-50 border border-yellow-200 rounded-sm p-3">
                       <p className="text-yellow-700 text-xs font-medium mb-1">Rows skipped:</p>
                       {bulkResult.errors.map((err: string, i: number) => (
-                        <p key={i} className="text-yellow-600 text-xs">{err}</p>
+                        <p key={i} className="text-yellow-600 text-xs">
+                          {err}
+                        </p>
                       ))}
                     </div>
                   )}
-                  <Button onClick={() => { setShowBulk(false); setBulkResult(null); }}>Done</Button>
+                  <Button
+                    onClick={() => {
+                      setShowBulk(false);
+                      setBulkResult(null);
+                    }}
+                  >
+                    Done
+                  </Button>
                 </div>
               )}
             </div>
@@ -375,24 +475,75 @@ export default function AdminStudentsPage() {
   );
 }
 
-function StudentForm({ form, setForm, error, onSubmit, saving, onCancel, submitLabel, isEdit = false }: any) {
-  const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-    setForm({ ...form, [key]: e.target.value });
+function StudentForm({
+  form,
+  setForm,
+  error,
+  onSubmit,
+  saving,
+  onCancel,
+  submitLabel,
+  isEdit,
+}: any) {
+  const set =
+    (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+      setForm({ ...form, [key]: e.target.value });
 
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-4">
+        {/* Student ID — full width, read-only in edit mode */}
+        <Field
+          label="Student ID"
+          required
+          className="col-span-2"
+          hint={isEdit ? "Student ID cannot be changed after creation" : "Enter a unique ID — e.g. WC-2025-001"}
+        >
+          <input
+            value={form.student_id}
+            onChange={isEdit ? undefined : set("student_id")}
+            readOnly={isEdit}
+            placeholder="WC-2025-001"
+            required
+            className={`w-full border rounded-sm px-3 py-2 text-sm focus:outline-none transition-colors ${
+              isEdit
+                ? "bg-cream border-cream-dark text-charcoal/50 cursor-not-allowed"
+                : "border-cream-dark text-charcoal placeholder-charcoal/30 focus:border-gold bg-white"
+            }`}
+          />
+        </Field>
+
         <Field label="Full Name" required className="col-span-2">
-          <Input value={form.name} onChange={set("name")} placeholder="Rafiul Islam" required />
+          <Input
+            value={form.name}
+            onChange={set("name")}
+            placeholder="Rafiul Islam"
+            required
+          />
         </Field>
         <Field label="School / College" required>
-          <Input value={form.school_college} onChange={set("school_college")} placeholder="Notre Dame College" required />
+          <Input
+            value={form.school_college}
+            onChange={set("school_college")}
+            placeholder="Notre Dame College"
+            required
+          />
         </Field>
         <Field label="Class / Year" required>
-          <Input value={form.class_level} onChange={set("class_level")} placeholder="Class 12 / Year 2" required />
+          <Input
+            value={form.class_level}
+            onChange={set("class_level")}
+            placeholder="Class 12"
+            required
+          />
         </Field>
         <Field label="Batch" required>
-          <Input value={form.batch} onChange={set("batch")} placeholder="Batch A 2025" required />
+          <Input
+            value={form.batch}
+            onChange={set("batch")}
+            placeholder="Batch A 2025"
+            required
+          />
         </Field>
         <Field label="Gender" required>
           <Select value={form.gender} onChange={set("gender")} required>
@@ -402,15 +553,34 @@ function StudentForm({ form, setForm, error, onSubmit, saving, onCancel, submitL
           </Select>
         </Field>
         <Field label="WhatsApp Number" required>
-          <Input value={form.whatsapp_number} onChange={set("whatsapp_number")} placeholder="01XXXXXXXXX" required />
+          <Input
+            value={form.whatsapp_number}
+            onChange={set("whatsapp_number")}
+            placeholder="01XXXXXXXXX"
+            required
+          />
         </Field>
         <Field label="Email (optional)">
-          <Input type="email" value={form.email} onChange={set("email")} placeholder="student@example.com" />
+          <Input
+            type="email"
+            value={form.email}
+            onChange={set("email")}
+            placeholder="student@example.com"
+          />
         </Field>
-        <Field label="Monthly Fee (৳)" hint="Set to auto-generate invoices on the 1st of each month">
-          <Input type="number" min="0" value={form.monthly_fee} onChange={set("monthly_fee")} placeholder="e.g. 2500" />
+        <Field label="Monthly Fee (BDT)" hint="Auto-invoiced on 1st of each month">
+          <Input
+            type="number"
+            min="0"
+            value={form.monthly_fee}
+            onChange={set("monthly_fee")}
+            placeholder="2500"
+          />
         </Field>
-        <Field label={isEdit ? "New Password (leave blank to keep)" : "Password (blank = Student ID)"} className="col-span-2">
+        <Field
+          label={isEdit ? "New Password (blank = keep current)" : "Password (blank = Student ID)"}
+          className="col-span-2"
+        >
           <Input
             type="password"
             value={form.password}
@@ -421,12 +591,18 @@ function StudentForm({ form, setForm, error, onSubmit, saving, onCancel, submitL
       </div>
 
       {error && (
-        <p className="text-red-500 text-xs bg-red-50 border border-red-200 rounded-sm px-3 py-2">{error}</p>
+        <p className="text-red-500 text-xs bg-red-50 border border-red-200 rounded-sm px-3 py-2">
+          {error}
+        </p>
       )}
 
       <div className="flex gap-3 pt-2">
-        <Button onClick={onSubmit} loading={saving}>{submitLabel}</Button>
-        <Button variant="ghost" onClick={onCancel}>Cancel</Button>
+        <Button onClick={onSubmit} loading={saving}>
+          {submitLabel}
+        </Button>
+        <Button variant="ghost" onClick={onCancel}>
+          Cancel
+        </Button>
       </div>
     </div>
   );
