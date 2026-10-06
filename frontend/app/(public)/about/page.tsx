@@ -21,7 +21,7 @@ export default function AboutPage() {
               We close the gap between knowledge and expression.
             </h2>
             <p className="text-charcoal/70 leading-relaxed mb-4">
-              White-Collar English Care was founded with a single conviction: that thousands of talented students in Chittagong are held back not by their intelligence — but by weak English scores in SSC, HSC, BCS, and admission exams.
+              White-Collar career And Academic Care was founded with a single conviction: that thousands of talented students in Chittagong are held back not by their intelligence — but by weak English scores in SSC, HSC, BCS, and admission exams.
             </p>
             <p className="text-charcoal/70 leading-relaxed">
               We exist to fix that. Through disciplined teaching, rigorous practice, and genuine attention to each student, we build exam-ready English skills that translate directly into results.
