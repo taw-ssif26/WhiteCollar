@@ -14,12 +14,8 @@ from services.storage import upload_photo, delete_photo
 router = APIRouter(prefix="/admin/students", tags=["Admin - Students"])
 
 
-def _generate_student_id(count: int) -> str:
-    year = datetime.now().year
-    return f"WC-{year}-{str(count + 1).zfill(3)}"
-
-
 class StudentCreate(BaseModel):
+    student_id: str           # admin provides this — not auto-generated
     name: str
     school_college: str
     class_level: str
@@ -27,7 +23,7 @@ class StudentCreate(BaseModel):
     gender: str
     email: Optional[str] = None
     whatsapp_number: str
-    password: Optional[str] = None
+    password: Optional[str] = None   # defaults to student_id if blank
     monthly_fee: Optional[float] = None
 
 
@@ -59,24 +55,26 @@ async def list_students(
         q = q.where(Student.batch == batch)
     if is_active is not None:
         q = q.where(Student.is_active == is_active)
-    q = q.order_by(Student.created_at.desc())
-    result = await db.execute(q)
-    return [_student_to_dict(s) for s in result.scalars().all()]
+    r = await db.execute(q.order_by(Student.created_at.desc()))
+    return [_s(s) for s in r.scalars().all()]
 
 
-@router.post("", status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=201)
 async def create_student(
     body: StudentCreate,
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(require_admin),
 ):
-    count_result = await db.execute(select(func.count()).select_from(Student))
-    count = count_result.scalar()
-    student_id = _generate_student_id(count)
-    password = body.password or student_id
+    # Validate student_id is provided and unique
+    if not body.student_id.strip():
+        raise HTTPException(status_code=400, detail="Student ID is required.")
+    existing = await db.execute(select(Student).where(Student.student_id == body.student_id.strip()))
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=400, detail=f"Student ID '{body.student_id}' already exists.")
 
+    password = body.password or body.student_id.strip()
     student = Student(
-        student_id=student_id,
+        student_id=body.student_id.strip(),
         name=body.name,
         school_college=body.school_college,
         class_level=body.class_level,
@@ -90,10 +88,10 @@ async def create_student(
     db.add(student)
     await db.commit()
     await db.refresh(student)
-    return {**_student_to_dict(student), "default_password": password}
+    return {**_s(student), "default_password": password}
 
 
-# ── BULK IMPORT must come BEFORE /{student_id} routes ─────────────────────────
+# ── BULK IMPORT must come BEFORE /{student_id} routes ────────────────────────
 @router.post("/bulk-import")
 async def bulk_import_students(
     file: UploadFile = File(...),
@@ -109,30 +107,26 @@ async def bulk_import_students(
     if not rows and errors:
         raise HTTPException(status_code=422, detail={"message": "CSV has errors", "errors": errors})
 
-    count_result = await db.execute(select(func.count()).select_from(Student))
-    base_count = count_result.scalar()
-
     created = []
-    for i, row in enumerate(rows):
-        student_id = _generate_student_id(base_count + i)
+    for row in rows:
+        sid = row.pop("student_id", "").strip()
+        if not sid:
+            errors.append(f"{row.get('name', 'unknown')}: student_id is empty — skipped")
+            continue
+        existing = await db.execute(select(Student).where(Student.student_id == sid))
+        if existing.scalar_one_or_none():
+            errors.append(f"{row.get('name', 'unknown')}: student_id '{sid}' already exists — skipped")
+            continue
         student = Student(
-            student_id=student_id,
-            password_hash=hash_password(student_id),
+            student_id=sid,
+            password_hash=hash_password(sid),
             **row,
         )
         db.add(student)
-        created.append({
-            "name": row["name"],
-            "student_id": student_id,
-            "default_password": student_id,
-        })
+        created.append({"name": row["name"], "student_id": sid, "default_password": sid})
 
     await db.commit()
-    return {
-        "created": len(created),
-        "errors": errors,
-        "students": created,
-    }
+    return {"created": len(created), "errors": errors, "students": created}
 
 
 # ── Per-student routes ────────────────────────────────────────────────────────
@@ -142,8 +136,7 @@ async def get_student(
     db: AsyncSession = Depends(get_db),
     _: dict = Depends(require_admin),
 ):
-    student = await _get_or_404(db, student_id)
-    return _student_to_dict(student)
+    return _s(await _get_or_404(db, student_id))
 
 
 @router.put("/{student_id}")
@@ -161,10 +154,10 @@ async def update_student(
             setattr(student, field, value)
     await db.commit()
     await db.refresh(student)
-    return _student_to_dict(student)
+    return _s(student)
 
 
-@router.delete("/{student_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{student_id}", status_code=204)
 async def delete_student(
     student_id: str,
     db: AsyncSession = Depends(get_db),
@@ -185,35 +178,30 @@ async def upload_student_photo(
     _: dict = Depends(require_admin),
 ):
     student = await _get_or_404(db, student_id)
-
     if photo.content_type not in {"image/jpeg", "image/png", "image/webp"}:
-        raise HTTPException(status_code=400, detail="Only JPEG, PNG, or WebP photos are allowed")
-
+        raise HTTPException(status_code=400, detail="Only JPEG, PNG, or WebP allowed")
     file_bytes = await photo.read()
     if len(file_bytes) > 5 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="Photo must be under 5MB")
-
     if student.photo_url:
         await delete_photo(student.photo_url)
-
     url = await upload_photo(file_bytes, photo.content_type)
     if not url:
-        raise HTTPException(status_code=500, detail="Photo upload failed — check R2 configuration")
-
+        raise HTTPException(status_code=500, detail="Photo upload failed")
     student.photo_url = url
     await db.commit()
     return {"photo_url": url}
 
 
 async def _get_or_404(db: AsyncSession, student_id: str) -> Student:
-    result = await db.execute(select(Student).where(Student.student_id == student_id))
-    student = result.scalar_one_or_none()
-    if not student:
+    r = await db.execute(select(Student).where(Student.student_id == student_id))
+    s = r.scalar_one_or_none()
+    if not s:
         raise HTTPException(status_code=404, detail="Student not found")
-    return student
+    return s
 
 
-def _student_to_dict(s: Student) -> dict:
+def _s(s: Student) -> dict:
     return {
         "id": str(s.id),
         "student_id": s.student_id,
