@@ -2,7 +2,8 @@ import csv
 import io
 from typing import Any
 
-REQUIRED_COLUMNS = {"name", "school_college", "class_level", "batch", "gender", "whatsapp_number"}
+# student_id is now required — admin provides it
+REQUIRED_COLUMNS = {"student_id", "name", "school_college", "class_level", "batch", "gender", "whatsapp_number"}
 
 COLUMN_ALIASES = {
     "school": "school_college",
@@ -11,6 +12,7 @@ COLUMN_ALIASES = {
     "phone": "whatsapp_number",
     "mobile": "whatsapp_number",
     "whatsapp": "whatsapp_number",
+    "id": "student_id",
 }
 
 
@@ -44,11 +46,14 @@ def parse_student_csv(file_bytes: bytes) -> tuple[list[dict[str, Any]], list[str
         for original_key, aliased_key in zip(reader.fieldnames or [], aliased_fields):
             normalized_row[aliased_key] = (row.get(original_key) or "").strip()
 
+        student_id = normalized_row.get("student_id", "")
         name = normalized_row.get("name", "")
         whatsapp = normalized_row.get("whatsapp_number", "")
         gender = normalized_row.get("gender", "").lower()
 
         row_errors = []
+        if not student_id:
+            row_errors.append("student_id is empty")
         if not name:
             row_errors.append("Name is empty")
         if not whatsapp or len(whatsapp) < 10:
@@ -61,6 +66,7 @@ def parse_student_csv(file_bytes: bytes) -> tuple[list[dict[str, Any]], list[str
             continue
 
         valid_rows.append({
+            "student_id": student_id,
             "name": name,
             "school_college": normalized_row.get("school_college", ""),
             "class_level": normalized_row.get("class_level", ""),
